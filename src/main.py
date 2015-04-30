@@ -1,6 +1,6 @@
 from models.actor import *
-from models.bondMovie import *
+from models.movie import *
 
 
-x = bondMovie("asd", "asd")
-x.girls = []
+x = Movie("asd", "asd")
+x.directors = []
