@@ -1,5 +1,8 @@
-class Movie(object):
-    """Represents a James Bond Movie"""
+from models.JSONEncodable import JSONEncodable
+
+
+class Movie(JSONEncodable):
+    """Represents a Movie"""
 
     def __init__(self, title, cinedate):
         self.title = title
@@ -32,8 +35,5 @@ class Movie(object):
     @soundtrack.setter
     def soundtrack(self, val):
         self.__soundtrack = val
-
-    def jdefault(o):
-        return o.__dict__
 
 
