@@ -10,12 +10,5 @@ class Song(JSONEncodable):
         self.title = title
         self.artist = artist
 
-        self.mbid = []
-
-    @property
-    def mbid(self):
-        return self.__mbid
-
-    @mbid.setter
-    def mbid(self, val):
-        self.__mbid = val
+        self.mbid = ""
+        self.artist_mbid = ""

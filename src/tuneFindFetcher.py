@@ -7,7 +7,7 @@ import StringIO
 from operator import methodcaller
 from time import sleep
 from models.movie import Movie
-from models.song import Song
+from models.Song import Song
 
 __author__ = 'Patrick'
 
@@ -65,13 +65,17 @@ def main():
         count += 1
         print("Adding Movie #%02d: %s" % (count,  m["name"]))
 
-        movie = Movie(m["name"], m["air_date"])
+        movie = Movie(m["name"])
+        movie.cinedate = m["air_date"]
         movie.soundtrack = get_songs(m['id'])
 
         movies.append(movie)
 
         # One request per second
         sleep(1.1)
+
+        if count == 50:
+            break
 
     with open('movies.json', 'w') as outfile:
         json.dump(movies, outfile, default=methodcaller("json"))
@@ -84,8 +88,6 @@ if __name__ == "__main__":
     print("API is limited to 1 request per second")
     print("")
     print("Usage:")
-    print("python tuneFindFetcher [APIUserName] [APIPasswor]")
-
-    exit()
+    print("python tuneFindFetcher [APIUserName] [APIPassword]")
 
     main()
