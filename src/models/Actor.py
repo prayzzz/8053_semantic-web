@@ -1,4 +1,7 @@
-class actor(object):
+__author__ = 'prayzzz'
+
+
+class Actor(object):
     """Represents an actor"""
 
     def __init__(self, firstname, lastname, sfirstname, slastname):

@@ -1,3 +1,8 @@
+from common import write_json
+
+__author__ = 'prayzzz'
+
+
 import json
 import sys
 import urllib2
@@ -6,15 +11,14 @@ import gzip
 import StringIO
 from operator import methodcaller
 from time import sleep
-from models.movie import Movie
+from models.Movie import Movie
 from models.Song import Song
 
-__author__ = 'Patrick'
 
 EP_MOVIES = "https://www.tunefind.com/api/v1/movie"
 EP_MOVIE_SONGS = "https://www.tunefind.com/api/v1/movie/%s"
-USERNAME = sys.argv[1]
-PASSWORD = sys.argv[2]
+USERNAME = ""
+PASSWORD = ""
 
 
 def parse_response(response):
@@ -66,7 +70,6 @@ def main():
         print("Adding Movie #%02d: %s" % (count,  m["name"]))
 
         movie = Movie(m["name"])
-        movie.cinedate = m["air_date"]
         movie.soundtrack = get_songs(m['id'])
 
         movies.append(movie)
@@ -74,20 +77,23 @@ def main():
         # One request per second
         sleep(1.1)
 
-        if count == 50:
+        if count == 10:
             break
 
-    with open('movies.json', 'w') as outfile:
-        json.dump(movies, outfile, default=methodcaller("json"))
+    write_json("movies.json", movies)
 
 
 # Main
 if __name__ == "__main__":
-    print("tuneFindFetcher by prayzzz")
-    print("fetches all movies with their songs (confidence=high) from tunefind.com")
-    print("API is limited to 1 request per second")
-    print("")
-    print("Usage:")
-    print("python tuneFindFetcher [APIUserName] [APIPassword]")
+    if len(sys.argv) < 2:
+        print("Tunefind.py")
+        print("fetches all movies with their songs (confidence=high) from tunefind.com")
+        print("API is limited to 1 request per second")
+        print("")
+        print("Usage:")
+        print("python tuneFindFetcher [APIUserName] [APIPassword]")
+        exit()
 
+    USERNAME = sys.argv[1]
+    PASSWORD = sys.argv[2]
     main()

@@ -1,3 +1,6 @@
+__author__ = 'prayzzz'
+
+
 from JSONEncodable import JSONEncodable
 
 
@@ -12,5 +15,5 @@ class Movie(JSONEncodable):
         self.cinedate_usa = ""
         self.cinedate_uk = ""
         self.directors = []
-        self.actors = []
+        self.cast = []
         self.soundtrack = []

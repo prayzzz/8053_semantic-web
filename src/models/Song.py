@@ -1,6 +1,7 @@
-from models.JSONEncodable import JSONEncodable
+__author__ = 'prayzzz'
 
-__author__ = 'Patrick'
+
+from models.JSONEncodable import JSONEncodable
 
 
 class Song(JSONEncodable):
