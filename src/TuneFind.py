@@ -2,21 +2,19 @@ from common import write_json
 
 __author__ = 'prayzzz'
 
-
 import json
 import sys
 import urllib2
 import base64
 import gzip
 import StringIO
-from operator import methodcaller
 from time import sleep
 from models.Movie import Movie
 from models.Song import Song
 
 
-EP_MOVIES = "https://www.tunefind.com/api/v1/movie"
-EP_MOVIE_SONGS = "https://www.tunefind.com/api/v1/movie/%s"
+EP_TUNEFIND_MOVIES = "https://www.tunefind.com/api/v1/movie"
+EP_TUNEFIND_MOVIE_SONGS = "https://www.tunefind.com/api/v1/movie/%s"
 USERNAME = ""
 PASSWORD = ""
 
@@ -42,7 +40,7 @@ def add_header(request):
 def get_songs(movieid):
     songs = []
 
-    request = urllib2.Request(EP_MOVIE_SONGS % movieid)
+    request = urllib2.Request(EP_TUNEFIND_MOVIE_SONGS % movieid)
     add_header(request)
 
     songdata = parse_response(urllib2.urlopen(request))
@@ -58,16 +56,17 @@ def get_songs(movieid):
 
 
 def main():
-    request = urllib2.Request(EP_MOVIES)
+    request = urllib2.Request(EP_TUNEFIND_MOVIES)
     add_header(request)
 
     moviedata = parse_response(urllib2.urlopen(request))
 
     count = 0
     movies = []
+    print "Adding..."
     for m in moviedata["movies"]:
         count += 1
-        print("Adding Movie #%02d: %s" % (count,  m["name"]))
+        print "#%02d: %s" % (count, m["name"])
 
         movie = Movie(m["name"])
         movie.soundtrack = get_songs(m['id'])
@@ -86,12 +85,10 @@ def main():
 # Main
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Tunefind.py")
-        print("fetches all movies with their songs (confidence=high) from tunefind.com")
-        print("API is limited to 1 request per second")
-        print("")
-        print("Usage:")
-        print("python tuneFindFetcher [APIUserName] [APIPassword]")
+        print "Tunefind.py"
+        print ""
+        print "Usage:"
+        print "python tuneFindFetcher [APIUserName] [APIPassword]"
         exit()
 
     USERNAME = sys.argv[1]

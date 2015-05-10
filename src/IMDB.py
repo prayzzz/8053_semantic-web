@@ -1,4 +1,4 @@
-import sys
+import re
 import urllib2
 
 from bs4 import BeautifulSoup
@@ -9,12 +9,12 @@ from common import read_json, write_json
 
 __author__ = "prayzzz"
 
-EP_RELEASEINFO = "http://www.imdb.com/title/%s/releaseinfo"
-EP_CAST = "http://www.imdb.com/title/%s/fullcredits"
+EP_IMDB_RELEASEINFO = "http://www.imdb.com/title/%s/releaseinfo"
+EP_IMDB_CAST = "http://www.imdb.com/title/%s/fullcredits"
 
 
 def fetch_release_info(m):
-    imdburl = EP_RELEASEINFO % m["imdb_id"]
+    imdburl = EP_IMDB_RELEASEINFO % m["imdb_id"]
 
     response = urllib2.urlopen(imdburl)
     html = response.read()
@@ -68,16 +68,28 @@ def fetch_release_info(m):
             m["cinedate_uk"] = info[0]["date"]
 
 
-def fetch_cast(m):
-    imdburl = EP_CAST % m["imdb_id"]
+def extract_directors(soup):
+    director_row = soup.find("h4", text=re.compile("Directed")).find_next_sibling("table").find("tr")
+    directors = []
 
-    response = urllib2.urlopen(imdburl)
-    html = response.read()
+    while director_row is not None:
+        if type(director_row) is NavigableString:
+            director_row = director_row.next_sibling
+            continue
 
-    soup = BeautifulSoup(html.replace("\n", ""))
+        director_tag = director_row.find("td", class_="name")
+
+        directors.append(director_tag.text.strip())
+
+        director_row = director_row.next_sibling
+
+    return directors
+
+
+def extract_cast(soup):
     info_row = soup.find(class_="cast_list").find("tr").find_next_sibling("tr")
-
     cast = []
+
     while info_row is not None:
         if type(info_row) is NavigableString:
             info_row = info_row.next_sibling
@@ -92,25 +104,46 @@ def fetch_cast(m):
         screen_name_tag = actor_tag.find_next_sibling(class_="character")
         if screen_name_tag is None:
             break
-        actor["screen_name"] = screen_name_tag.text.strip()
-        # TODO remove parenthesis ex: Wimpy Loser       (as Benjamin Laurance)
+
+        screen_name = screen_name_tag.text.strip()
+        re_match = re.search("^(.+?)(\((\w|\W)+?\))?$", screen_name)
+
+        if len(re_match.groups()) < 2:
+            actor["screen_name"] = screen_name
+        else:
+            actor["screen_name"] = re_match.group(1).strip()
 
         cast.append(actor)
-
         info_row = info_row.next_sibling
 
-    m["cast"] = cast
+    return cast
 
-    # End While
+
+def fetch_cast(m):
+    imdburl = EP_IMDB_CAST % m["imdb_id"]
+
+    response = urllib2.urlopen(imdburl)
+    html = response.read()
+
+    soup = BeautifulSoup(html.replace("\n", ""))
+
+    # Director
+    directors = extract_directors(soup)
+    m["directors"] = directors
+
+    # Cast
+    cast = extract_cast(soup)
+    m["cast"] = cast
 
 
 def main():
     movies = read_json("movies.json")
 
+    print "Processing..."
     for m in movies:
-        print("Processing %s %s" % (m["title"], m["imdb_id"]))
+        print "{0:35} {1:10}".format(m["title"], m["imdb_id"])
 
-        # fetch_release_info(m)
+        fetch_release_info(m)
         fetch_cast(m)
 
     write_json("movies.json", movies)
@@ -118,11 +151,4 @@ def main():
 
 # Main
 if __name__ == "__main__":
-    if len(sys.argv) < 1:
-        print("IMDB.py")
-        print("")
-        print("Usage:")
-        print("python IMDB [APIKey]")
-        exit()
-
     main()
