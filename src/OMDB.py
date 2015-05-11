@@ -1,17 +1,18 @@
 import json
 import re
 import urllib2
-from common import write_json, read_json
+import common
 
 
 __author__ = "Patrick"
+
 
 EP_OMDB = "http://www.omdbapi.com/?t=%s&y=&plot=short&r=json"
 
 
 # Main
 def main():
-    movies = read_json("movies.json")
+    movies = common.read_json("movies.json")
 
     print "Processing..."
     for m in movies:
@@ -32,7 +33,7 @@ def main():
 
         m["imdb_id"] = data["imdbID"]
 
-    write_json("movies.json", movies)
+    common.write_json("movies.json", movies)
 
 
 if __name__ == "__main__":
