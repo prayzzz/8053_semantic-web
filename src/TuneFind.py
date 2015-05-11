@@ -65,7 +65,7 @@ def main():
         count += 1
         print "#%02d: %s" % (count, m["name"])
 
-        movie = {"name": m["name"], "soundtrack": get_songs(m['id'])}
+        movie = {"title": m["name"], "soundtrack": get_songs(m['id'])}
         movies.append(movie)
 
         # One request per second
@@ -83,7 +83,7 @@ if __name__ == "__main__":
         print "Tunefind.py"
         print ""
         print "Usage:"
-        print "python tuneFindFetcher [APIUserName] [APIPassword]"
+        print "python TuneFind.py [APIUserName] [APIPassword]"
         exit()
 
     USERNAME = sys.argv[1]

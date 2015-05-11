@@ -1,13 +1,12 @@
 __author__ = 'Patrick'
 
 import json
-from operator import methodcaller
 
 
 def write_json(filepath, obj):
     global outfile
     with open(filepath, "w") as outfile:
-        json.dump(obj, outfile, default=methodcaller("json"))
+        json.dump(obj, outfile)
 
 
 def read_json(filepath):
