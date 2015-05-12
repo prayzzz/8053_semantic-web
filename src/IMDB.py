@@ -1,11 +1,9 @@
 from multiprocessing.pool import Pool
 import re
-import urllib2
 
 from bs4 import BeautifulSoup
-from bs4.element import NavigableString
 
-from common import read_json, write_json
+import common
 
 
 __author__ = "prayzzz"
@@ -15,20 +13,14 @@ EP_IMDB_CAST = "http://www.imdb.com/title/%s/fullcredits"
 
 
 def fetch_release_info(m):
-    imdburl = EP_IMDB_RELEASEINFO % m["imdb_id"]
-
-    response = urllib2.urlopen(imdburl)
-    html = response.read()
+    url = EP_IMDB_RELEASEINFO % m["imdb_id"]
+    html = common.request_url(url)
 
     soup = BeautifulSoup(html.replace("\n", ""))
     info_row = soup.find(id="release_dates").find("tr")
 
     release_infos = []
     while info_row is not None:
-        if type(info_row) is NavigableString:
-            info_row = info_row.next_sibling
-            continue
-
         info = {}
         country_tag = info_row.contents[1]
         info["country"] = country_tag.text.strip()
@@ -40,7 +32,7 @@ def fetch_release_info(m):
         info["event"] = event_tag.text.strip()
 
         release_infos.append(info)
-        info_row = info_row.next_sibling
+        info_row = info_row.find_next_sibling("tr")
 
     # End While
 
@@ -74,15 +66,10 @@ def extract_directors(soup):
     directors = []
 
     while director_row is not None:
-        if type(director_row) is NavigableString:
-            director_row = director_row.next_sibling
-            continue
-
         director_tag = director_row.find("td", class_="name")
-
         directors.append(director_tag.text.strip())
 
-        director_row = director_row.next_sibling
+        director_row = director_row.find_next_sibling("tr")
 
     return directors
 
@@ -92,10 +79,6 @@ def extract_cast(soup):
     cast = []
 
     while info_row is not None:
-        if type(info_row) is NavigableString:
-            info_row = info_row.next_sibling
-            continue
-
         actor = {}
         actor_tag = info_row.find(attrs={"itemprop": "actor"})
         if actor_tag is None:
@@ -115,16 +98,14 @@ def extract_cast(soup):
             actor["screen_name"] = re_match.group(1).strip()
 
         cast.append(actor)
-        info_row = info_row.next_sibling
+        info_row = info_row.find_next_sibling("tr")
 
     return cast
 
 
 def fetch_cast(m):
-    imdburl = EP_IMDB_CAST % m["imdb_id"]
-
-    response = urllib2.urlopen(imdburl)
-    html = response.read()
+    url = EP_IMDB_CAST % m["imdb_id"]
+    html = common.request_url(url)
 
     soup = BeautifulSoup(html.replace("\n", ""))
 
@@ -142,11 +123,13 @@ def process_movie(m):
     fetch_release_info(m)
     fetch_cast(m)
 
+    return m
+
 
 def main():
     print "Processing..."
 
-    movies = read_json("movies.json")
+    movies = common.read_json("movies.json")
 
     pool = Pool(5)
     results = [pool.apply_async(process_movie, [m]) for m in movies]

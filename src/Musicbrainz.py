@@ -29,16 +29,17 @@ def process_song(s):
 
 
 def process_movie(m):
-    musicbrainzngs.set_useragent("Semantic Web Project", "0.1", "https://github.com/prayzzz/movie-soundtrack-events")
+    musicbrainzngs.set_useragent(
+        "Application for Semantic Web Lecture @ HTWK Leipzig; patrick.bachmann@stud.htwk-leipzig.de", "0.1")
     print "{0:35} {1:10}".format(m["title"], m["imdb_id"])
 
     for s in m["soundtrack"]:
         process_song(s)
 
+    return m
+
 
 def main():
-    musicbrainzngs.set_useragent("Semantic Web Project", "0.1", "https://github.com/prayzzz/movie-soundtrack-events")
-
     print "Processing"
 
     movies = common.read_json("movies.json")

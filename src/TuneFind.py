@@ -32,7 +32,8 @@ def add_header(request):
     request.add_header("accept", "text/html, application/json")
     request.add_header("accept-encoding", "gzip, deflate")
     request.add_header("authorization", "Basic %s" % base64string)
-    request.add_header("user-agent", "Mozilla/5.0")
+
+    common.add_useragent(request)
 
 
 def get_songs(movieid):

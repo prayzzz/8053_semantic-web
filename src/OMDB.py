@@ -24,8 +24,7 @@ def process_movie(m):
 
     title = title.replace(" ", "+")
     url = EP_OMDB % urllib2.quote(title)
-    response = urllib2.urlopen(url)
-    data = json.load(response)
+    data = json.loads(common.request_url(url))
 
     m["imdb_id"] = data["imdbID"]
 

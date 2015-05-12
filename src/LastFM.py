@@ -10,25 +10,24 @@ __author__ = 'Patrick'
 API_KEY = ""
 API_SECRET = ""
 
+
 def process_song(s, network):
+    # try:
+    #     result = network.get_track_by_mbid(s["mbid"])
+    # except pylast.WSError:
+    #     result = None
+
+    # if result is None:
     try:
-        result = network.get_track_by_mbid(s["mbid"])
-    except pylast.WSError:
-        result = None
-
-    if result is None:
-        try:
-            result = network.get_track(s["artist"], s["title"])
-        except pylast.WSError:
-            result = None
-
-    if result is None:
-        print u"Song not found {0:s} - {1:s}".format(s["artist"], s["title"])
+        result = network.get_track(s["artist"], s["title"])
+    except pylast.WSError, e:
+        print e.details + u" {0:s} - {1:s}".format(s["artist"], s["title"])
         return
 
     try:
         top_tags = result.get_top_tags(5)
-    except pylast.WSError:
+    except pylast.WSError, e:
+        print e.details + u" {0:s} - {1:s}".format(s["artist"], s["title"])
         return
 
     tags = s["tags"] if "tags" in s else []
@@ -40,11 +39,16 @@ def process_song(s, network):
 
 
 def process_movie(m):
-    network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET)
+    api_key = sys.argv[1]
+    api_secret = sys.argv[2]
+    network = pylast.LastFMNetwork(api_key=api_key, api_secret=api_secret)
+
     print "{0:35} {1:10}".format(m["title"], m["imdb_id"])
 
     for s in m["soundtrack"]:
         process_song(s, network)
+
+    return m
 
 
 def main():
