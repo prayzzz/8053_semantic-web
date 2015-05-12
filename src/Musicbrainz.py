@@ -1,3 +1,4 @@
+from multiprocessing.pool import Pool
 import musicbrainzngs
 import common
 
@@ -28,6 +29,7 @@ def process_song(s):
 
 
 def process_movie(m):
+    musicbrainzngs.set_useragent("Semantic Web Project", "0.1", "https://github.com/prayzzz/movie-soundtrack-events")
     print "{0:35} {1:10}".format(m["title"], m["imdb_id"])
 
     for s in m["soundtrack"]:
@@ -40,10 +42,16 @@ def main():
     print "Processing"
 
     movies = common.read_json("movies.json")
-    for m in movies:
-        process_movie(m)
 
-    common.write_json("movies.json", movies)
+    pool = Pool(5)
+    results = [pool.apply_async(process_movie, [m]) for m in movies]
+
+    updated_movies = []
+    for w in results:
+        w.wait()
+        updated_movies.append(w.get())
+
+    common.write_json("movies.json", updated_movies)
 
 
 if __name__ == "__main__":

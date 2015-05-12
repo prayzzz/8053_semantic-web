@@ -1,3 +1,4 @@
+from multiprocessing.pool import Pool
 import re
 import urllib2
 
@@ -136,17 +137,26 @@ def fetch_cast(m):
     m["cast"] = cast
 
 
+def process_movie(m):
+    print "{0:35} {1:10}".format(m["title"], m["imdb_id"])
+    fetch_release_info(m)
+    fetch_cast(m)
+
+
 def main():
+    print "Processing..."
+
     movies = read_json("movies.json")
 
-    print "Processing..."
-    for m in movies:
-        print "{0:35} {1:10}".format(m["title"], m["imdb_id"])
+    pool = Pool(5)
+    results = [pool.apply_async(process_movie, [m]) for m in movies]
 
-        fetch_release_info(m)
-        fetch_cast(m)
+    updated_movies = []
+    for w in results:
+        w.wait()
+        updated_movies.append(w.get())
 
-    write_json("movies.json", movies)
+    common.write_json("movies.json", updated_movies)
 
 
 # Main

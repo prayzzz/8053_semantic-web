@@ -1,7 +1,9 @@
-from multiprocessing import Pool, freeze_support
+from multiprocessing import Pool
 import sys
+
 import pylast
 import common
+
 
 __author__ = 'Patrick'
 
@@ -37,36 +39,28 @@ def process_song(s, network):
     s["tags"] = tags
 
 
-def process_movie(m, network):
+def process_movie(m):
+    network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET)
     print "{0:35} {1:10}".format(m["title"], m["imdb_id"])
 
     for s in m["soundtrack"]:
         process_song(s, network)
 
-def main():
-    network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET)
 
+def main():
     print "Processing"
 
     movies = common.read_json("movies.json")
 
+    pool = Pool(5)
+    results = [pool.apply_async(process_movie, [m]) for m in movies]
 
-    pool_size = 5  # your "parallelness"
-    pool = Pool(pool_size)
-    asd = [pool.apply_async(process_movie, (m, network)) for m in movies]
+    updated_movies = []
+    for w in results:
+        w.wait()
+        updated_movies.append(w.get())
 
-    for a in asd:
-        a.wait()
-
-    # for m in movies:
-    #     pool.apply_async(process_movie, [m, network])
-    #     # process_movie(m, network)
-
-    #pool.close()
-    #pool.join()
-
-    print "Finished"
-    common.write_json("movies.json", movies)
+    common.write_json("movies.json", updated_movies)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
