@@ -46,7 +46,7 @@ def process_date(current_date):
 
 # Main
 def main():
-    start_date = datetime.strptime("01.01.2014", "%d.%m.%Y")
+    start_date = datetime.strptime("05.01.1990", "%d.%m.%Y")
     end_date = datetime.strptime("01.01.2015", "%d.%m.%Y")
 
     date_delta = timedelta(days=7)
