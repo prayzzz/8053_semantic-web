@@ -1,7 +1,5 @@
 import urllib2
 
-__author__ = 'prayzzz'
-
 from JsonHelper import *
 
 __author__ = 'prayzzz'

@@ -1,4 +1,5 @@
 from multiprocessing.pool import Pool
+from datetime import datetime
 import re
 
 from bs4 import BeautifulSoup
@@ -38,27 +39,27 @@ def fetch_release_info(m):
 
     info = filter(lambda x: x['event'] == "" and x['country'] == "USA", release_infos)
     if len(info) > 0:
-        m["cinedate_usa"] = info[0]["date"]
+        m["cinedate_usa"] = datetime.strptime(info[0]["date"], "%d %B %Y").strftime("%d.%m.%Y")
     else:
         info = filter(lambda x: x['country'] == "USA", release_infos)
         if len(info) > 0:
-            m["cinedate_usa"] = info[0]["date"]
+            m["cinedate_usa"] = datetime.strptime(info[0]["date"], "%d %B %Y").strftime("%d.%m.%Y")
 
     info = filter(lambda x: x['event'] == "" and x['country'] == "Germany", release_infos)
     if len(info) > 0:
-        m["cinedate_germany"] = info[0]["date"]
+        m["cinedate_germany"] = datetime.strptime(info[0]["date"], "%d %B %Y").strftime("%d.%m.%Y")
     else:
         info = filter(lambda x: x['country'] == "Germany", release_infos)
         if len(info) > 0:
-            m["cinedate_germany"] = info[0]["date"]
+            m["cinedate_germany"] = datetime.strptime(info[0]["date"], "%d %B %Y").strftime("%d.%m.%Y")
 
     info = filter(lambda x: x['event'] == "" and x['country'] == "UK", release_infos)
     if len(info) > 0:
-        m["cinedate_uk"] = info[0]["date"]
+        m["cinedate_uk"] = datetime.strptime(info[0]["date"], "%d %B %Y").strftime("%d.%m.%Y")
     else:
         info = filter(lambda x: x['country'] == "UK", release_infos)
         if len(info) > 0:
-            m["cinedate_uk"] = info[0]["date"]
+            m["cinedate_uk"] = datetime.strptime(info[0]["date"], "%d %B %Y").strftime("%d.%m.%Y")
 
 
 def extract_directors(soup):
