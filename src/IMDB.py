@@ -121,16 +121,18 @@ def fetch_cast(m):
 
 def process_movie(m):
     print "{0:35} {1:10}".format(m["title"], m["imdb_id"])
-    fetch_release_info(m)
-    fetch_cast(m)
 
-    return m
+    entry = {"imdb_id": m["imdb_id"]}
+    fetch_release_info(entry)
+    fetch_cast(entry)
+
+    return entry
 
 
 def main():
     print "Processing..."
 
-    movies = common.read_json("movies.json")
+    movies = common.read_json("omdb.json")
 
     pool = Pool(5)
     results = [pool.apply_async(process_movie, [m]) for m in movies]
@@ -140,7 +142,7 @@ def main():
         w.wait()
         updated_movies.append(w.get())
 
-    common.write_json("movies.json", updated_movies)
+    common.write_json("imdb.json", updated_movies)
 
 
 # Main

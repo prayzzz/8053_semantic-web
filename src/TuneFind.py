@@ -75,7 +75,7 @@ def main():
         if count == 10:
             break
 
-    common.write_json("movies.json", movies)
+    common.write_json("tunefind.json", movies)
 
 
 # Main

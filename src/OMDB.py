@@ -26,13 +26,12 @@ def process_movie(m):
     url = EP_OMDB % urllib2.quote(title)
     data = json.loads(common.request_url(url))
 
-    m["imdb_id"] = data["imdbID"]
-
-    return m
+    entry = {"title": m["title"], "imdb_id": data["imdbID"]}
+    return entry
 
 
 def main():
-    movies = common.read_json("movies.json")
+    movies = common.read_json("tunefind.json")
 
     print "Processing..."
 
@@ -44,7 +43,7 @@ def main():
         w.wait()
         updated_movies.append(w.get())
 
-    common.write_json("movies.json", updated_movies)
+    common.write_json("omdb.json", updated_movies)
 
 
 if __name__ == "__main__":

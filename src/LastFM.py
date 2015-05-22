@@ -43,18 +43,19 @@ def process_movie(m):
     api_secret = sys.argv[2]
     network = pylast.LastFMNetwork(api_key=api_key, api_secret=api_secret)
 
-    print "{0:35} {1:10}".format(m["title"], m["imdb_id"])
+    print "{0:35}".format(m["title"])
 
-    for s in m["soundtrack"]:
+    songs = list(m["soundtrack"])
+    for s in songs:
         process_song(s, network)
 
-    return m
+    return songs
 
 
 def main():
     print "Processing"
 
-    movies = common.read_json("movies.json")
+    movies = common.read_json("tunefind.json")
 
     pool = Pool(5)
     results = [pool.apply_async(process_movie, [m]) for m in movies]
@@ -64,7 +65,7 @@ def main():
         w.wait()
         updated_movies.append(w.get())
 
-    common.write_json("movies.json", updated_movies)
+    common.write_json("lastfm.json", updated_movies)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
