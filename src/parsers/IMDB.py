@@ -3,6 +3,7 @@ from datetime import datetime
 import re
 
 from bs4 import BeautifulSoup
+from rdflib import Namespace, Graph, URIRef, RDF, RDFS, Literal, BNode, XSD
 
 import common
 
@@ -10,6 +11,47 @@ __author__ = "prayzzz"
 
 EP_IMDB_RELEASEINFO = "http://www.imdb.com/title/%s/releaseinfo"
 EP_IMDB_CAST = "http://www.imdb.com/title/%s/fullcredits"
+
+BASE_URI = "http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#%s"
+NS_PB_TF = Namespace("http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#")
+NS_DBPEDIA_OWL = Namespace("http://dbpedia.org/ontology/")
+NS_DBPPROP = Namespace("http://dbpedia.org/property/")
+
+
+def toRdf(movies):
+    g = Graph()
+    g.bind("", NS_PB_TF)
+    g.bind("dbpedia-owl", NS_DBPEDIA_OWL)
+    g.bind("dbpprop", NS_DBPPROP)
+
+    for m in movies:
+        mov = URIRef(BASE_URI % common.encodeString(m["title"]))
+        g.add((mov, RDF.type, NS_DBPEDIA_OWL.Film))
+        g.add((mov, RDFS.label, Literal(m["title"])))
+        g.add((mov, NS_DBPPROP.title, Literal(m["title"])))
+        g.add((mov, NS_DBPEDIA_OWL.imdbId, Literal(m["imdb_id"])))
+
+        for s in m["directors"]:
+            director = URIRef(BASE_URI % common.encodeString(s))
+            g.add((director, RDF.type, NS_DBPEDIA_OWL.Person))
+            g.add((director, RDFS.label, Literal(s)))
+            g.add((mov, NS_DBPEDIA_OWL.director, director))
+
+        for c in m["cast"]:
+            actor = URIRef(BASE_URI % common.encodeString(c["name"]))
+            g.add((actor, RDF.type, NS_DBPEDIA_OWL.Actor))
+            g.add((actor, RDFS.label, Literal(c["name"])))
+            g.add((mov, NS_DBPEDIA_OWL.starring, actor))
+
+        for r in m["release_info"]:
+            release = BNode()
+            g.add((release, RDF.type, NS_PB_TF.ReleaseCountry))
+            g.add((release, NS_DBPEDIA_OWL.publicationDate, Literal(r["date"], datatype=XSD.datetime)))
+            g.add((release, NS_DBPEDIA_OWL.comment, Literal(r["event"])))
+            g.add((release, NS_DBPEDIA_OWL.country, URIRef("http://dbpedia.org/resource/%s" % common.encodeString(r["country"]))))
+            g.add((mov, NS_PB_TF.ReleaseCountry, release))
+
+    common.write_rdf("imdb.owl", g)
 
 
 def fetch_release_info(m):
@@ -26,7 +68,10 @@ def fetch_release_info(m):
         info["country"] = country_tag.text.strip()
 
         date_tag = country_tag.find_next_sibling("td")
-        info["date"] = date_tag.text.strip()
+        try:
+            info["date"] = datetime.strptime(date_tag.text.strip(), "%d %B %Y").strftime("%Y-%m-%dT%H:%M:%S")
+        except ValueError:
+            info["date"] = datetime.strptime(date_tag.text.strip(), "%B %Y").strftime("%Y-%m-%dT%H:%M:%S")
 
         event_tag = date_tag.find_next_sibling("td")
         info["event"] = event_tag.text.strip()
@@ -34,31 +79,9 @@ def fetch_release_info(m):
         release_infos.append(info)
         info_row = info_row.find_next_sibling("tr")
 
+    m["release_info"] = release_infos
+
     # End While
-
-    info = filter(lambda x: x['event'] == "" and x['country'] == "USA", release_infos)
-    if len(info) > 0:
-        m["cinedate_usa"] = datetime.strptime(info[0]["date"], "%d %B %Y").strftime("%d.%m.%Y")
-    else:
-        info = filter(lambda x: x['country'] == "USA", release_infos)
-        if len(info) > 0:
-            m["cinedate_usa"] = datetime.strptime(info[0]["date"], "%d %B %Y").strftime("%d.%m.%Y")
-
-    info = filter(lambda x: x['event'] == "" and x['country'] == "Germany", release_infos)
-    if len(info) > 0:
-        m["cinedate_germany"] = datetime.strptime(info[0]["date"], "%d %B %Y").strftime("%d.%m.%Y")
-    else:
-        info = filter(lambda x: x['country'] == "Germany", release_infos)
-        if len(info) > 0:
-            m["cinedate_germany"] = datetime.strptime(info[0]["date"], "%d %B %Y").strftime("%d.%m.%Y")
-
-    info = filter(lambda x: x['event'] == "" and x['country'] == "UK", release_infos)
-    if len(info) > 0:
-        m["cinedate_uk"] = datetime.strptime(info[0]["date"], "%d %B %Y").strftime("%d.%m.%Y")
-    else:
-        info = filter(lambda x: x['country'] == "UK", release_infos)
-        if len(info) > 0:
-            m["cinedate_uk"] = datetime.strptime(info[0]["date"], "%d %B %Y").strftime("%d.%m.%Y")
 
 
 def extract_directors(soup):
@@ -121,7 +144,7 @@ def fetch_cast(m):
 def process_movie(m):
     print "{0:35} {1:10}".format(m["title"], m["imdb_id"])
 
-    entry = {"imdb_id": m["imdb_id"]}
+    entry = {"title": m["title"], "imdb_id": m["imdb_id"]}
     fetch_release_info(entry)
     fetch_cast(entry)
 
@@ -142,6 +165,7 @@ def main():
         updated_movies.append(w.get())
 
     common.write_json("imdb.json", updated_movies)
+    toRdf(updated_movies)
 
 # Main
 if __name__ == "__main__":

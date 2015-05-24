@@ -23,6 +23,7 @@ NS_PB_TF = Namespace("http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#")
 NS_DBPEDIA_OWL = Namespace("http://dbpedia.org/ontology/")
 NS_DBPPROP = Namespace("http://dbpedia.org/property/")
 
+
 def toRdf(movies):
     g = Graph()
     g.bind("", NS_PB_TF)
@@ -37,7 +38,8 @@ def toRdf(movies):
 
         for s in m["soundtrack"]:
             artist = URIRef(BASE_URI % common.encodeString(s["artist"]))
-            g.add((artist, RDF.type, NS_DBPEDIA_OWL.Agent))
+            g.add((artist, RDF.type, NS_DBPEDIA_OWL.MusicalArtist))
+            g.add((artist, RDFS.label, s["artist"]))
 
             song = URIRef(BASE_URI % common.encodeString(s["title"]))
             g.add((song, RDF.type, NS_DBPEDIA_OWL.Song))
@@ -48,6 +50,7 @@ def toRdf(movies):
             g.add((mov, NS_PB_TF.contains, song))
 
     common.write_rdf("tunefind.owl", g)
+
 
 def parse_response(response):
     if response.info().get('Content-Encoding') != 'gzip':
