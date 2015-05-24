@@ -2,22 +2,13 @@ from multiprocessing import Pool
 import sys
 
 import pylast
-import common
 
+import common
 
 __author__ = 'Patrick'
 
-API_KEY = ""
-API_SECRET = ""
-
 
 def process_song(s, network):
-    # try:
-    #     result = network.get_track_by_mbid(s["mbid"])
-    # except pylast.WSError:
-    #     result = None
-
-    # if result is None:
     try:
         result = network.get_track(s["artist"], s["title"])
     except pylast.WSError, e:
@@ -67,6 +58,7 @@ def main():
 
     common.write_json("lastfm.json", updated_movies)
 
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print "LastFM.py"
@@ -75,6 +67,4 @@ if __name__ == "__main__":
         print "python LastFM.py [API_KEY] [API_SECRECT]"
         exit()
 
-    API_KEY = sys.argv[1]
-    API_SECRET = sys.argv[2]
     main()

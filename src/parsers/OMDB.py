@@ -4,9 +4,7 @@ import re
 import urllib2
 import common
 
-
-__author__ = "Patrick"
-
+__author__ = "prayzzz"
 
 EP_OMDB = "http://www.omdbapi.com/?t=%s&y=&plot=short&r=json"
 

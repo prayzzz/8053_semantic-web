@@ -8,7 +8,6 @@ from time import sleep
 
 import common
 
-
 __author__ = 'prayzzz'
 
 EP_TUNEFIND_MOVIES = "https://www.tunefind.com/api/v1/movie"
@@ -78,7 +77,6 @@ def main():
     common.write_json("tunefind.json", movies)
 
 
-# Main
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print "Tunefind.py"

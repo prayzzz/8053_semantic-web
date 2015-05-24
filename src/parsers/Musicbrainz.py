@@ -42,7 +42,7 @@ def process_movie(m):
 def main():
     print "Processing"
 
-    movies = common.read_json("movies.json")
+    movies = common.read_json("tunefind.json")
 
     pool = Pool(5)
     results = [pool.apply_async(process_movie, [m]) for m in movies]
@@ -52,7 +52,7 @@ def main():
         w.wait()
         updated_movies.append(w.get())
 
-    common.write_json("movies.json", updated_movies)
+    common.write_json("musicbrainz.json", updated_movies)
 
 
 if __name__ == "__main__":

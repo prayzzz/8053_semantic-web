@@ -6,7 +6,6 @@ from bs4 import BeautifulSoup
 
 import common
 
-
 __author__ = "prayzzz"
 
 EP_IMDB_RELEASEINFO = "http://www.imdb.com/title/%s/releaseinfo"
@@ -143,7 +142,6 @@ def main():
         updated_movies.append(w.get())
 
     common.write_json("imdb.json", updated_movies)
-
 
 # Main
 if __name__ == "__main__":
