@@ -2,14 +2,36 @@ import json
 from multiprocessing.pool import Pool
 import re
 import urllib2
+
+from rdflib import Graph, Namespace, URIRef, RDF, RDFS, Literal
+
 import common
 
 __author__ = "prayzzz"
 
 EP_OMDB = "http://www.omdbapi.com/?t=%s&y=&plot=short&r=json"
 
+BASE_URI = "http://imn.htwk-leipzig.de/pbachman/ontologies/omdb#%s"
+NS_PB_TF = Namespace("http://imn.htwk-leipzig.de/pbachman/ontologies/omdb#")
+NS_DBPEDIA_OWL = Namespace("http://dbpedia.org/ontology/")
+NS_DBPPROP = Namespace("http://dbpedia.org/property/")
 
-# Main
+def toRdf(movies):
+    g = Graph()
+    g.bind("", NS_PB_TF)
+    g.bind("dbpedia-owl", NS_DBPEDIA_OWL)
+    g.bind("dbpprop", NS_DBPPROP)
+
+    for m in movies:
+        mov = URIRef(BASE_URI % common.encodeString(m["title"]))
+        g.add((mov, RDF.type, NS_DBPEDIA_OWL.Film))
+        g.add((mov, RDFS.label, Literal(m["title"])))
+        g.add((mov, NS_DBPPROP.title, Literal(m["title"])))
+        g.add((mov, NS_DBPEDIA_OWL.imdbId, Literal(m["imdb_id"])))
+
+    common.write_rdf("omdb.owl", g)
+
+
 def process_movie(m):
     print m["title"]
 
@@ -42,6 +64,7 @@ def main():
         updated_movies.append(w.get())
 
     common.write_json("omdb.json", updated_movies)
+    toRdf(updated_movies)
 
 
 if __name__ == "__main__":

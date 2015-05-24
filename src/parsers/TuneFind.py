@@ -6,23 +6,55 @@ import gzip
 import StringIO
 from time import sleep
 
+from rdflib import Namespace, Graph, URIRef, RDF, RDFS, Literal
+
 import common
 
 __author__ = 'prayzzz'
 
-EP_TUNEFIND_MOVIES = "https://www.tunefind.com/api/v1/movie"
-EP_TUNEFIND_MOVIE_SONGS = "https://www.tunefind.com/api/v1/movie/%s"
 USERNAME = ""
 PASSWORD = ""
 
+EP_TUNEFIND_MOVIES = "https://www.tunefind.com/api/v1/movie"
+EP_TUNEFIND_MOVIE_SONGS = "https://www.tunefind.com/api/v1/movie/%s"
+
+BASE_URI = "http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#%s"
+NS_PB_TF = Namespace("http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#")
+NS_DBPEDIA_OWL = Namespace("http://dbpedia.org/ontology/")
+NS_DBPPROP = Namespace("http://dbpedia.org/property/")
+
+def toRdf(movies):
+    g = Graph()
+    g.bind("", NS_PB_TF)
+    g.bind("dbpedia-owl", NS_DBPEDIA_OWL)
+    g.bind("dbpprop", NS_DBPPROP)
+
+    for m in movies:
+        mov = URIRef(BASE_URI % common.encodeString(m["title"]))
+        g.add((mov, RDF.type, NS_DBPEDIA_OWL.Film))
+        g.add((mov, RDFS.label, Literal(m["title"])))
+        g.add((mov, NS_DBPPROP.title, Literal(m["title"])))
+
+        for s in m["soundtrack"]:
+            artist = URIRef(BASE_URI % common.encodeString(s["artist"]))
+            g.add((artist, RDF.type, NS_DBPEDIA_OWL.Agent))
+
+            song = URIRef(BASE_URI % common.encodeString(s["title"]))
+            g.add((song, RDF.type, NS_DBPEDIA_OWL.Song))
+            g.add((song, RDFS.label, Literal(s["title"])))
+            g.add((song, NS_DBPPROP.title, Literal(s["title"])))
+            g.add((song, NS_DBPEDIA_OWL.artist, artist))
+
+            g.add((mov, NS_PB_TF.contains, song))
+
+    common.write_rdf("tunefind.owl", g)
 
 def parse_response(response):
     if response.info().get('Content-Encoding') != 'gzip':
         return response.read()
 
-    buf = StringIO.StringIO(response.read())
-    f = gzip.GzipFile(fileobj=buf)
-    data = json.load(f)
+    fp = gzip.GzipFile('', 'rb', 9, StringIO.StringIO(response.read()))
+    data = json.load(fp, encoding="utf-8")
     return data
 
 
@@ -75,6 +107,7 @@ def main():
             break
 
     common.write_json("tunefind.json", movies)
+    toRdf(movies)
 
 
 if __name__ == "__main__":

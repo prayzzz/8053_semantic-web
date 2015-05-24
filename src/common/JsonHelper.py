@@ -5,9 +5,8 @@ __author__ = 'Patrick'
 DIRECTORY = "data/"
 
 def write_json(filepath, obj):
-    global outfile
     with open(DIRECTORY + filepath, "w") as outfile:
-        json.dump(obj, outfile)
+        json.dump(obj, outfile, encoding="utf-8")
 
 
 def read_json(filepath):
