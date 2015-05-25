@@ -13,43 +13,51 @@ EP_IMDB_RELEASEINFO = "http://www.imdb.com/title/%s/releaseinfo"
 EP_IMDB_CAST = "http://www.imdb.com/title/%s/fullcredits"
 
 BASE_URI = "http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#%s"
-NS_PB_TF = Namespace("http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#")
+NS_IMDB = Namespace("http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#")
 NS_DBPEDIA_OWL = Namespace("http://dbpedia.org/ontology/")
 NS_DBPPROP = Namespace("http://dbpedia.org/property/")
 
 
 def toRdf(movies):
     g = Graph()
-    g.bind("", NS_PB_TF)
+    g.bind("", NS_IMDB)
     g.bind("dbpedia-owl", NS_DBPEDIA_OWL)
     g.bind("dbpprop", NS_DBPPROP)
 
     for m in movies:
-        mov = URIRef(BASE_URI % common.encodeString(m["title"]))
-        g.add((mov, RDF.type, NS_DBPEDIA_OWL.Film))
-        g.add((mov, RDFS.label, Literal(m["title"])))
-        g.add((mov, NS_DBPPROP.title, Literal(m["title"])))
-        g.add((mov, NS_DBPEDIA_OWL.imdbId, Literal(m["imdb_id"])))
+        movie = URIRef(BASE_URI % common.encodeString(m["title"]))
+        g.add((movie, RDF.type, NS_DBPEDIA_OWL.Film))
+        g.add((movie, RDFS.label, Literal(m["title"])))
+        g.add((movie, NS_DBPPROP.title, Literal(m["title"])))
+        g.add((movie, NS_DBPEDIA_OWL.imdbId, Literal(m["imdb_id"])))
 
-        for s in m["directors"]:
-            director = URIRef(BASE_URI % common.encodeString(s))
+        for name in m["directors"]:
+            director = URIRef(BASE_URI % common.encodeString(name))
             g.add((director, RDF.type, NS_DBPEDIA_OWL.Person))
-            g.add((director, RDFS.label, Literal(s)))
-            g.add((mov, NS_DBPEDIA_OWL.director, director))
+            g.add((director, RDFS.label, Literal(name)))
+            g.add((director, NS_DBPPROP.name, Literal(name)))
+            g.add((movie, NS_DBPEDIA_OWL.director, director))
 
-        for c in m["cast"]:
-            actor = URIRef(BASE_URI % common.encodeString(c["name"]))
+        for cast in m["cast"]:
+            actor = URIRef(BASE_URI % common.encodeString(cast["name"]))
             g.add((actor, RDF.type, NS_DBPEDIA_OWL.Actor))
-            g.add((actor, RDFS.label, Literal(c["name"])))
-            g.add((mov, NS_DBPEDIA_OWL.starring, actor))
+            g.add((actor, RDFS.label, Literal(cast["name"])))
+            g.add((actor, NS_DBPPROP.name, Literal(cast["name"])))
 
-        for r in m["release_info"]:
+            character = BNode()
+            g.add((character, RDF.type, NS_IMDB.Character))
+            g.add((character, NS_IMDB.actedBy, actor))
+            g.add((character, NS_IMDB.screenName, Literal(cast["screen_name"])))
+            g.add((movie, NS_IMDB.cast, character))
+
+        for info in m["release_info"]:
             release = BNode()
-            g.add((release, RDF.type, NS_PB_TF.ReleaseCountry))
-            g.add((release, NS_DBPEDIA_OWL.publicationDate, Literal(r["date"], datatype=XSD.datetime)))
-            g.add((release, NS_DBPEDIA_OWL.comment, Literal(r["event"])))
-            g.add((release, NS_DBPEDIA_OWL.country, URIRef("http://dbpedia.org/resource/%s" % common.encodeString(r["country"]))))
-            g.add((mov, NS_PB_TF.ReleaseCountry, release))
+            g.add((release, RDF.type, NS_IMDB.ReleaseCountry))
+            g.add((release, NS_DBPEDIA_OWL.publicationDate, Literal(info["date"], datatype=XSD.datetime)))
+            g.add((release, NS_DBPEDIA_OWL.comment, Literal(info["event"])))
+            g.add((release, NS_DBPEDIA_OWL.country,
+                   URIRef("http://dbpedia.org/resource/%s" % common.encodeString(info["country"]))))
+            g.add((movie, NS_IMDB.releasedIn, release))
 
     common.write_rdf("imdb.owl", g)
 

@@ -19,27 +19,28 @@ EP_TUNEFIND_MOVIES = "https://www.tunefind.com/api/v1/movie"
 EP_TUNEFIND_MOVIE_SONGS = "https://www.tunefind.com/api/v1/movie/%s"
 
 BASE_URI = "http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#%s"
-NS_PB_TF = Namespace("http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#")
+NS_TUNEFIND = Namespace("http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#")
 NS_DBPEDIA_OWL = Namespace("http://dbpedia.org/ontology/")
 NS_DBPPROP = Namespace("http://dbpedia.org/property/")
 
 
 def toRdf(movies):
     g = Graph()
-    g.bind("", NS_PB_TF)
+    g.bind("", NS_TUNEFIND)
     g.bind("dbpedia-owl", NS_DBPEDIA_OWL)
     g.bind("dbpprop", NS_DBPPROP)
 
     for m in movies:
-        mov = URIRef(BASE_URI % common.encodeString(m["title"]))
-        g.add((mov, RDF.type, NS_DBPEDIA_OWL.Film))
-        g.add((mov, RDFS.label, Literal(m["title"])))
-        g.add((mov, NS_DBPPROP.title, Literal(m["title"])))
+        movie = URIRef(BASE_URI % common.encodeString(m["title"]))
+        g.add((movie, RDF.type, NS_DBPEDIA_OWL.Film))
+        g.add((movie, RDFS.label, Literal(m["title"])))
+        g.add((movie, NS_DBPPROP.title, Literal(m["title"])))
 
         for s in m["soundtrack"]:
             artist = URIRef(BASE_URI % common.encodeString(s["artist"]))
             g.add((artist, RDF.type, NS_DBPEDIA_OWL.MusicalArtist))
-            g.add((artist, RDFS.label, s["artist"]))
+            g.add((artist, RDFS.label, Literal(s["artist"])))
+            g.add((artist, NS_DBPPROP.name, Literal(s["artist"])))
 
             song = URIRef(BASE_URI % common.encodeString(s["title"]))
             g.add((song, RDF.type, NS_DBPEDIA_OWL.Song))
@@ -47,7 +48,7 @@ def toRdf(movies):
             g.add((song, NS_DBPPROP.title, Literal(s["title"])))
             g.add((song, NS_DBPEDIA_OWL.artist, artist))
 
-            g.add((mov, NS_PB_TF.contains, song))
+            g.add((movie, NS_TUNEFIND.contains, song))
 
     common.write_rdf("tunefind.owl", g)
 

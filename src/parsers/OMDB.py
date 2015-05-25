@@ -12,22 +12,23 @@ __author__ = "prayzzz"
 EP_OMDB = "http://www.omdbapi.com/?t=%s&y=&plot=short&r=json"
 
 BASE_URI = "http://imn.htwk-leipzig.de/pbachman/ontologies/omdb#%s"
-NS_PB_TF = Namespace("http://imn.htwk-leipzig.de/pbachman/ontologies/omdb#")
+NS_OMDB = Namespace("http://imn.htwk-leipzig.de/pbachman/ontologies/omdb#")
 NS_DBPEDIA_OWL = Namespace("http://dbpedia.org/ontology/")
 NS_DBPPROP = Namespace("http://dbpedia.org/property/")
 
+
 def toRdf(movies):
     g = Graph()
-    g.bind("", NS_PB_TF)
+    g.bind("", NS_OMDB)
     g.bind("dbpedia-owl", NS_DBPEDIA_OWL)
     g.bind("dbpprop", NS_DBPPROP)
 
     for m in movies:
-        mov = URIRef(BASE_URI % common.encodeString(m["title"]))
-        g.add((mov, RDF.type, NS_DBPEDIA_OWL.Film))
-        g.add((mov, RDFS.label, Literal(m["title"])))
-        g.add((mov, NS_DBPPROP.title, Literal(m["title"])))
-        g.add((mov, NS_DBPEDIA_OWL.imdbId, Literal(m["imdb_id"])))
+        movie = URIRef(BASE_URI % common.encodeString(m["title"]))
+        g.add((movie, RDF.type, NS_DBPEDIA_OWL.Film))
+        g.add((movie, RDFS.label, Literal(m["title"])))
+        g.add((movie, NS_DBPPROP.title, Literal(m["title"])))
+        g.add((movie, NS_DBPEDIA_OWL.imdbId, Literal(m["imdb_id"])))
 
     common.write_rdf("omdb.owl", g)
 
