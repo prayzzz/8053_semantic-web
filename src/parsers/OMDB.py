@@ -1,13 +1,21 @@
+import getopt
 import json
 from multiprocessing.pool import Pool
 import re
 import urllib2
 
 from rdflib import Graph, Namespace, URIRef, RDF, RDFS, Literal
+import sys
 
 import common
 
 __author__ = "prayzzz"
+
+JSON_IN_FILE = "tunefind.json"
+JSON_OUT_FILE = "omdb.json"
+RDF_OUT_FILE = "omdb.owl"
+LOAD_FROM_WEB = False
+CONVERT_TO_RDF = False
 
 EP_OMDB = "http://www.omdbapi.com/?t=%s&y=&plot=short&r=json"
 
@@ -17,7 +25,11 @@ NS_DBPEDIA_OWL = Namespace("http://dbpedia.org/ontology/")
 NS_DBPPROP = Namespace("http://dbpedia.org/property/")
 
 
-def toRdf(movies):
+def convert_to_rdf():
+    print "Convert to RDF..."
+
+    movies = common.read_json(JSON_OUT_FILE)
+
     g = Graph()
     g.bind("", NS_OMDB)
     g.bind("dbpedia-owl", NS_DBPEDIA_OWL)
@@ -30,7 +42,7 @@ def toRdf(movies):
         g.add((movie, NS_DBPPROP.title, Literal(m["title"])))
         g.add((movie, NS_DBPEDIA_OWL.imdbId, Literal(m["imdb_id"])))
 
-    common.write_rdf("omdb.owl", g)
+    common.write_rdf(RDF_OUT_FILE, g)
 
 
 def process_movie(m):
@@ -51,10 +63,10 @@ def process_movie(m):
     return entry
 
 
-def main():
-    movies = common.read_json("tunefind.json")
+def load_from_web():
+    print "Loading from Web..."
 
-    print "Processing..."
+    movies = common.read_json(JSON_IN_FILE)
 
     pool = Pool(5)
     results = [pool.apply_async(process_movie, [m]) for m in movies]
@@ -64,9 +76,37 @@ def main():
         w.wait()
         updated_movies.append(w.get())
 
-    common.write_json("omdb.json", updated_movies)
-    toRdf(updated_movies)
+    common.write_json(JSON_OUT_FILE, updated_movies)
+
+
+def usage():
+    print "OMDB.py"
+    print ""
+    print "Usage:"
+    print "python OMDB.py"
+    print " -w \t Load data from Web"
+    print " -r \t Convert data to RDF"
+
+
+def main():
+    if LOAD_FROM_WEB:
+        load_from_web()
+
+    if CONVERT_TO_RDF:
+        convert_to_rdf()
 
 
 if __name__ == "__main__":
+    try:
+        options = getopt.getopt(sys.argv[1:], "wr", ["web", "rdf"])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
+
+    for opt, arg in options[0]:
+        if opt == "-w":
+            LOAD_FROM_WEB = True
+        elif opt == "-r":
+            CONVERT_TO_RDF = True
+
     main()

@@ -1,3 +1,4 @@
+import getopt
 import json
 import sys
 import urllib2
@@ -14,6 +15,10 @@ __author__ = 'prayzzz'
 
 USERNAME = ""
 PASSWORD = ""
+JSON_OUT_FILE = "tunefind.json"
+RDF_OUT_FILE = "tunefind.owl"
+LOAD_FROM_WEB = False
+CONVERT_TO_RDF = False
 
 EP_TUNEFIND_MOVIES = "https://www.tunefind.com/api/v1/movie"
 EP_TUNEFIND_MOVIE_SONGS = "https://www.tunefind.com/api/v1/movie/%s"
@@ -24,7 +29,11 @@ NS_DBPEDIA_OWL = Namespace("http://dbpedia.org/ontology/")
 NS_DBPPROP = Namespace("http://dbpedia.org/property/")
 
 
-def toRdf(movies):
+def convert_to_rdf():
+    print "Convert to RDF..."
+
+    movies = common.read_json(JSON_OUT_FILE)
+
     g = Graph()
     g.bind("", NS_TUNEFIND)
     g.bind("dbpedia-owl", NS_DBPEDIA_OWL)
@@ -50,7 +59,7 @@ def toRdf(movies):
 
             g.add((movie, NS_TUNEFIND.contains, song))
 
-    common.write_rdf("tunefind.owl", g)
+    common.write_rdf(RDF_OUT_FILE, g)
 
 
 def parse_response(response):
@@ -88,10 +97,11 @@ def get_songs(movieid):
     return songs
 
 
-def main():
+def load_From_Web():
+    print "Loading from Web..."
+
     request = urllib2.Request(EP_TUNEFIND_MOVIES)
     add_header(request)
-
     moviedata = parse_response(urllib2.urlopen(request))
 
     count = 0
@@ -110,18 +120,43 @@ def main():
         if count == 10:
             break
 
-    common.write_json("tunefind.json", movies)
-    toRdf(movies)
+    common.write_json(JSON_OUT_FILE, movies)
+
+
+def main():
+    if LOAD_FROM_WEB:
+        load_From_Web()
+
+    if CONVERT_TO_RDF:
+        convert_to_rdf()
+
+
+def usage():
+    print "TuneFind.py"
+    print ""
+    print "Usage:"
+    print "python TuneFind.py"
+    print " -w \t Load data from Web"
+    print " -r \t Convert data to RDF"
+    print " -u \t API Username"
+    print " -u \t API Password"
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print "Tunefind.py"
-        print ""
-        print "Usage:"
-        print "python TuneFind.py [APIUserName] [APIPassword]"
-        exit()
+    try:
+        options = getopt.getopt(sys.argv[1:], "wru:p:j:ro:", ["web", "rdf", "username=", "password="])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
 
-    USERNAME = sys.argv[1]
-    PASSWORD = sys.argv[2]
+    for opt, arg in options[0]:
+        if opt in ('-u', '--username'):
+            USERNAME = arg
+        elif opt in ('-p', '--password'):
+            PASSWORD = arg
+        elif opt == "-w":
+            LOAD_FROM_WEB = True
+        elif opt == "-r":
+            CONVERT_TO_RDF = True
+
     main()

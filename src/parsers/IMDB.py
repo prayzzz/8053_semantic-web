@@ -1,13 +1,21 @@
+import getopt
 from multiprocessing.pool import Pool
 from datetime import datetime
 import re
 
 from bs4 import BeautifulSoup
 from rdflib import Namespace, Graph, URIRef, RDF, RDFS, Literal, BNode, XSD
+import sys
 
 import common
 
 __author__ = "prayzzz"
+
+JSON_IN_FILE = "omdb.json"
+JSON_OUT_FILE = "imdb.json"
+RDF_OUT_FILE = "imdb.owl"
+LOAD_FROM_WEB = False
+CONVERT_TO_RDF = False
 
 EP_IMDB_RELEASEINFO = "http://www.imdb.com/title/%s/releaseinfo"
 EP_IMDB_CAST = "http://www.imdb.com/title/%s/fullcredits"
@@ -18,7 +26,10 @@ NS_DBPEDIA_OWL = Namespace("http://dbpedia.org/ontology/")
 NS_DBPPROP = Namespace("http://dbpedia.org/property/")
 
 
-def toRdf(movies):
+def convert_to_rdf():
+    movies = common.read_json(JSON_OUT_FILE)
+
+    print "Converting to RDF"
     g = Graph()
     g.bind("", NS_IMDB)
     g.bind("dbpedia-owl", NS_DBPEDIA_OWL)
@@ -59,7 +70,7 @@ def toRdf(movies):
                    URIRef("http://dbpedia.org/resource/%s" % common.encodeString(info["country"]))))
             g.add((movie, NS_IMDB.releasedIn, release))
 
-    common.write_rdf("imdb.owl", g)
+    common.write_rdf(RDF_OUT_FILE, g)
 
 
 def fetch_release_info(m):
@@ -159,22 +170,38 @@ def process_movie(m):
     return entry
 
 
-def main():
-    print "Processing..."
+def load_from_web():
+    print "Loading from Web"
 
-    movies = common.read_json("omdb.json")
+    movies = common.read_json(JSON_IN_FILE)
 
     pool = Pool(5)
     results = [pool.apply_async(process_movie, [m]) for m in movies]
-
     updated_movies = []
     for w in results:
         w.wait()
         updated_movies.append(w.get())
 
-    common.write_json("imdb.json", updated_movies)
-    toRdf(updated_movies)
+    common.write_json(JSON_OUT_FILE, updated_movies)
+
+
+def main():
+    if LOAD_FROM_WEB:
+        load_from_web()
+    if CONVERT_TO_RDF:
+        convert_to_rdf()
 
 # Main
 if __name__ == "__main__":
+    try:
+        options = getopt.getopt(sys.argv[1:], "wr", ["web", "rdf"])
+    except getopt.GetoptError:
+        sys.exit(2)
+
+    for opt, arg in options[0]:
+        if opt == "-w":
+            LOAD_FROM_WEB = True
+        elif opt == "-r":
+            CONVERT_TO_RDF = True
+
     main()

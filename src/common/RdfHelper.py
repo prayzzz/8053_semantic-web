@@ -5,6 +5,7 @@ __author__ = 'Patrick'
 DIRECTORY = "data/"
 
 def write_rdf(filepath, graph):
+    print "Writing %s..." % filepath
     with open(DIRECTORY + filepath, "w") as outfile:
         outfile.write(graph.serialize(format="turtle"))
 
