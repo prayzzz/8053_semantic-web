@@ -55,19 +55,19 @@ def convert_to_rdf():
 
 def process_songs(songs, network):
     for s in songs:
-        # print u"Processing {0:s} - {1:s}".format(s["artist"], s["title"])
+        print u"{0:s} - {1:s}".format(s["artist"], s["title"])
 
         try:
             result = network.get_track(s["artist"], s["title"])
         except pylast.WSError, e:
             print e.details + u" {0:s} - {1:s}".format(s["artist"], s["title"])
-            return
+            continue
 
         try:
             top_tags = result.get_top_tags(5)
         except pylast.WSError, e:
             print e.details + u" {0:s} - {1:s}".format(s["artist"], s["title"])
-            return
+            continue
 
         tags = s["tags"] if "tags" in s else []
 
@@ -76,7 +76,6 @@ def process_songs(songs, network):
 
         s["tags"] = tags
 
-    print len(songs)
     return songs
 
 
@@ -91,14 +90,13 @@ def load_from_web():
         if len(m["soundtrack"]) > 0:
             song_chunks.append(m["soundtrack"])
 
-    pool = Pool(5)
-    results = [pool.apply_async(process_songs, [chunk, network]) for chunk in song_chunks]
+    pool = Pool(1)
+    worker = [pool.apply_async(process_songs, [chunk, network]) for chunk in song_chunks]
 
     lastfm_songs = []
-    for w in results:
+    for w in worker:
         w.wait()
-        get = w.get()
-        for s in get:
+        for s in w.get():
             lastfm_songs.append(s)
 
     common.write_json(JSON_OUT_FILE, lastfm_songs)

@@ -71,10 +71,10 @@ def load_from_web():
     movies = common.read_json(JSON_IN_FILE)
 
     pool = Pool(5)
-    results = [pool.apply_async(process_movie, [m]) for m in movies]
+    worker = [pool.apply_async(process_movie, [m]) for m in movies]
 
     omdb_movies = []
-    for w in results:
+    for w in worker:
         w.wait()
         omdb_movies.append(w.get())
 

@@ -60,11 +60,12 @@ def convert_to_rdf():
 
             g.add((chart, NS_CHARTS.rankedSong, ranked))
 
-    common.write_rdf("charts_de.owl", g)
+    common.write_rdf(RDF_OUT_FILE, g)
 
 
 def process_date(current_date):
-    print "Charts for %s" % current_date.strftime("%d.%m.%Y")
+    print u"{0:s}".format(current_date.strftime("%d.%m.%Y"))
+
     date_in_milliseconds = time.mktime(current_date.timetuple()) * 1000
     url = EP % date_in_milliseconds
 
@@ -93,6 +94,7 @@ def process_date(current_date):
 # Main
 def load_from_web():
     print "Loading from Web..."
+
     start_date = datetime.strptime("01.12.2014", "%d.%m.%Y")
     end_date = datetime.strptime("01.01.2015", "%d.%m.%Y")
 
