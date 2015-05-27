@@ -27,9 +27,11 @@ NS_DBPPROP = Namespace("http://dbpedia.org/property/")
 
 
 def convert_to_rdf():
+    print ""
+    print "Convert to RDF..."
+
     movies = common.read_json(JSON_OUT_FILE)
 
-    print "Converting to RDF"
     g = Graph()
     g.bind("", NS_IMDB)
     g.bind("dbpedia-owl", NS_DBPEDIA_OWL)
@@ -100,8 +102,6 @@ def fetch_release_info(m):
 
     m["release_info"] = release_infos
 
-    # End While
-
 
 def extract_directors(soup):
     director_row = soup.find("h4", text=re.compile("Directed")).find_next_sibling("table").find("tr")
@@ -163,11 +163,11 @@ def fetch_cast(m):
 def process_movie(m):
     print "{0:35} {1:10}".format(m["title"], m["imdb_id"])
 
-    entry = {"title": m["title"], "imdb_id": m["imdb_id"]}
-    fetch_release_info(entry)
-    fetch_cast(entry)
+    movie = {"title": m["title"], "imdb_id": m["imdb_id"]}
+    fetch_release_info(movie)
+    fetch_cast(movie)
 
-    return entry
+    return movie
 
 
 def load_from_web():
@@ -177,17 +177,28 @@ def load_from_web():
 
     pool = Pool(5)
     results = [pool.apply_async(process_movie, [m]) for m in movies]
-    updated_movies = []
+
+    imdb_movies = []
     for w in results:
         w.wait()
-        updated_movies.append(w.get())
+        imdb_movies.append(w.get())
 
-    common.write_json(JSON_OUT_FILE, updated_movies)
+    common.write_json(JSON_OUT_FILE, imdb_movies)
+
+
+def usage():
+    print "IMDB.py"
+    print ""
+    print "Usage:"
+    print "python IMDB.py"
+    print " -w \t Load data from Web"
+    print " -r \t Convert data to RDF"
 
 
 def main():
     if LOAD_FROM_WEB:
         load_from_web()
+
     if CONVERT_TO_RDF:
         convert_to_rdf()
 
@@ -196,6 +207,7 @@ if __name__ == "__main__":
     try:
         options = getopt.getopt(sys.argv[1:], "wr", ["web", "rdf"])
     except getopt.GetoptError:
+        usage()
         sys.exit(2)
 
     for opt, arg in options[0]:

@@ -26,6 +26,7 @@ NS_DBPPROP = Namespace("http://dbpedia.org/property/")
 
 
 def convert_to_rdf():
+    print ""
     print "Convert to RDF..."
 
     movies = common.read_json(JSON_OUT_FILE)
@@ -59,11 +60,12 @@ def process_movie(m):
     url = EP_OMDB % urllib2.quote(title)
     data = json.loads(common.request_url(url))
 
-    entry = {"title": m["title"], "imdb_id": data["imdbID"]}
-    return entry
+    movie = {"title": m["title"], "imdb_id": data["imdbID"]}
+    return movie
 
 
 def load_from_web():
+    print ""
     print "Loading from Web..."
 
     movies = common.read_json(JSON_IN_FILE)
@@ -71,12 +73,12 @@ def load_from_web():
     pool = Pool(5)
     results = [pool.apply_async(process_movie, [m]) for m in movies]
 
-    updated_movies = []
+    omdb_movies = []
     for w in results:
         w.wait()
-        updated_movies.append(w.get())
+        omdb_movies.append(w.get())
 
-    common.write_json(JSON_OUT_FILE, updated_movies)
+    common.write_json(JSON_OUT_FILE, omdb_movies)
 
 
 def usage():

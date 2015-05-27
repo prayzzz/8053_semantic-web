@@ -30,6 +30,7 @@ NS_DBPPROP = Namespace("http://dbpedia.org/property/")
 
 
 def convert_to_rdf():
+    print ""
     print "Convert to RDF..."
 
     movies = common.read_json(JSON_OUT_FILE)
@@ -97,7 +98,8 @@ def get_songs(movieid):
     return songs
 
 
-def load_From_Web():
+def load_from_web():
+    print ""
     print "Loading from Web..."
 
     request = urllib2.Request(EP_TUNEFIND_MOVIES)
@@ -106,7 +108,6 @@ def load_From_Web():
 
     count = 0
     movies = []
-    print "Adding..."
     for m in moviedata["movies"]:
         count += 1
         print "#%02d: %s" % (count, m["name"])
@@ -117,7 +118,7 @@ def load_From_Web():
         # One request per second
         sleep(1.1)
 
-        if count == 10:
+        if count == 3:
             break
 
     common.write_json(JSON_OUT_FILE, movies)
@@ -125,7 +126,7 @@ def load_From_Web():
 
 def main():
     if LOAD_FROM_WEB:
-        load_From_Web()
+        load_from_web()
 
     if CONVERT_TO_RDF:
         convert_to_rdf()
@@ -139,12 +140,12 @@ def usage():
     print " -w \t Load data from Web"
     print " -r \t Convert data to RDF"
     print " -u \t API Username"
-    print " -u \t API Password"
+    print " -p \t API Password"
 
 
 if __name__ == "__main__":
     try:
-        options = getopt.getopt(sys.argv[1:], "wru:p:j:ro:", ["web", "rdf", "username=", "password="])
+        options = getopt.getopt(sys.argv[1:], "wru:p:", ["web", "rdf", "username=", "password="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
