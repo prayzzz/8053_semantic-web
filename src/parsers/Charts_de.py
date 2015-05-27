@@ -17,6 +17,8 @@ JSON_OUT_FILE = "charts_de.json"
 RDF_OUT_FILE = "charts_de.owl"
 LOAD_FROM_WEB = False
 CONVERT_TO_RDF = False
+STARTDATE = "01.12.2014"
+ENDDATE = "01.01.2015"
 
 BASE_URI = "http://imn.htwk-leipzig.de/pbachman/ontologies/charts#%s"
 NS_CHARTS = Namespace("http://imn.htwk-leipzig.de/pbachman/ontologies/charts#")
@@ -56,7 +58,7 @@ def convert_to_rdf():
             ranked = BNode()
             g.add((ranked, RDF.type, NS_CHARTS.RankedSong))
             g.add((ranked, NS_CHARTS.song, song))
-            g.add((ranked, NS_CHARTS.position, Literal(t["pos"])))
+            g.add((ranked, NS_CHARTS.position, Literal(t["pos"], datatype=XSD.integer)))
 
             g.add((chart, NS_CHARTS.rankedSong, ranked))
 
@@ -95,8 +97,8 @@ def process_date(current_date):
 def load_from_web():
     print "Loading from Web..."
 
-    start_date = datetime.strptime("01.12.2014", "%d.%m.%Y")
-    end_date = datetime.strptime("01.01.2015", "%d.%m.%Y")
+    start_date = datetime.strptime(STARTDATE, "%d.%m.%Y")
+    end_date = datetime.strptime(ENDDATE, "%d.%m.%Y")
 
     date_delta = timedelta(days=7)
     current_date = start_date
