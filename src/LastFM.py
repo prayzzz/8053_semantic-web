@@ -11,7 +11,7 @@ __author__ = 'Patrick'
 
 JSON_IN_FILE = "tunefind.json"
 JSON_OUT_FILE = "lastfm.json"
-RDF_OUT_FILE = "lastfm.owl"
+RDF_OUT_FILE = "lastfm.ttl"
 LOAD_FROM_WEB = False
 CONVERT_TO_RDF = False
 

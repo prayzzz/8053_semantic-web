@@ -16,9 +16,10 @@ __author__ = 'prayzzz'
 USERNAME = ""
 PASSWORD = ""
 JSON_OUT_FILE = "tunefind.json"
-RDF_OUT_FILE = "tunefind.owl"
+RDF_OUT_FILE = "tunefind.ttl"
 LOAD_FROM_WEB = False
 CONVERT_TO_RDF = False
+LIMIT = 10
 
 EP_TUNEFIND_MOVIES = "https://www.tunefind.com/api/v1/movie"
 EP_TUNEFIND_MOVIE_SONGS = "https://www.tunefind.com/api/v1/movie/%s"
@@ -41,7 +42,7 @@ def convert_to_rdf():
     g.bind("dbpprop", NS_DBPPROP)
 
     for m in movies:
-        movie = URIRef(BASE_URI % common.encodeString(m["title"]))
+        movie = URIRef(BASE_URI % common.encodeString(common.encodeString(m["title"])))
         g.add((movie, RDF.type, NS_DBPEDIA_OWL.Film))
         g.add((movie, RDFS.label, Literal(m["title"])))
         g.add((movie, NS_DBPPROP.title, Literal(m["title"])))
@@ -118,7 +119,7 @@ def load_from_web():
         # One request per second
         sleep(1.1)
 
-        if count == 3:
+        if str(count) == LIMIT:
             break
 
     common.write_json(JSON_OUT_FILE, movies)
@@ -141,11 +142,12 @@ def usage():
     print " -r \t Convert data to RDF"
     print " -u \t API Username"
     print " -p \t API Password"
+    print " -l \t Limit, 0: no limit"
 
 
 if __name__ == "__main__":
     try:
-        options = getopt.getopt(sys.argv[1:], "wru:p:", ["web", "rdf", "username=", "password="])
+        options = getopt.getopt(sys.argv[1:], "wru:p:l:", ["web", "rdf", "username=", "password=", "limit="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -155,6 +157,8 @@ if __name__ == "__main__":
             USERNAME = arg
         elif opt in ('-p', '--password'):
             PASSWORD = arg
+        elif opt in ('-l', '--limit'):
+            LIMIT = arg
         elif opt == "-w":
             LOAD_FROM_WEB = True
         elif opt == "-r":

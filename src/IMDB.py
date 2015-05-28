@@ -13,7 +13,7 @@ __author__ = "prayzzz"
 
 JSON_IN_FILE = "omdb.json"
 JSON_OUT_FILE = "imdb.json"
-RDF_OUT_FILE = "imdb.owl"
+RDF_OUT_FILE = "imdb.ttl"
 LOAD_FROM_WEB = False
 CONVERT_TO_RDF = False
 

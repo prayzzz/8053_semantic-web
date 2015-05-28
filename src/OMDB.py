@@ -13,7 +13,7 @@ __author__ = "prayzzz"
 
 JSON_IN_FILE = "tunefind.json"
 JSON_OUT_FILE = "omdb.json"
-RDF_OUT_FILE = "omdb.owl"
+RDF_OUT_FILE = "omdb.ttl"
 LOAD_FROM_WEB = False
 CONVERT_TO_RDF = False
 

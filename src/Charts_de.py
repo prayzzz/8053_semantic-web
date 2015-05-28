@@ -14,7 +14,7 @@ __author__ = 'prayzzz'
 EP = "https://www.offiziellecharts.de/charts/single/for-date-%d"
 
 JSON_OUT_FILE = "charts_de.json"
-RDF_OUT_FILE = "charts_de.owl"
+RDF_OUT_FILE = "charts_de.ttl"
 LOAD_FROM_WEB = False
 CONVERT_TO_RDF = False
 STARTDATE = "01.12.2014"
@@ -49,7 +49,7 @@ def convert_to_rdf():
             g.add((artist, RDFS.label, Literal(t["artist"])))
             g.add((artist, NS_DBPPROP.name, Literal(t["artist"])))
 
-            song = URIRef(BASE_URI % common.encodeString(t["artist"] + "-" + t["title"]))
+            song = URIRef(BASE_URI % common.encodeString(t["title"]))
             g.add((song, RDF.type, NS_DBPEDIA_OWL.Song))
             g.add((song, RDFS.label, Literal(t["title"])))
             g.add((song, NS_DBPPROP.title, Literal(t["title"])))
@@ -126,6 +126,8 @@ def usage():
     print "python Charts_de.py"
     print " -w \t Load data from Web"
     print " -r \t Convert data to RDF"
+    print " -s \t Startdate"
+    print " -e \t Enddate"
 
 
 def main():
@@ -138,7 +140,7 @@ def main():
 # Main
 if __name__ == "__main__":
     try:
-        options = getopt.getopt(sys.argv[1:], "wr", ["web", "rdf"])
+        options = getopt.getopt(sys.argv[1:], "wrs:e:", ["web", "rdf", "startdate=", "enddate="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -148,5 +150,9 @@ if __name__ == "__main__":
             LOAD_FROM_WEB = True
         elif opt == "-r":
             CONVERT_TO_RDF = True
+        elif opt in ('-s', '--startdate'):
+            LIMIT = STARTDATE
+        elif opt in ('-e', '--enddate'):
+            LIMIT = ENDDATE
 
     main()
