@@ -42,7 +42,7 @@ def convert_to_rdf():
     g.bind("dbpprop", NS_DBPPROP)
 
     for m in movies:
-        movie = URIRef(BASE_URI % common.encodeString(common.encodeString(m["title"])))
+        movie = URIRef(BASE_URI % common.encodeString(m["title"]))
         g.add((movie, RDF.type, NS_DBPEDIA_OWL.Film))
         g.add((movie, RDFS.label, Literal(m["title"])))
         g.add((movie, NS_DBPPROP.title, Literal(m["title"])))

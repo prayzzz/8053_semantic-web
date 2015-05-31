@@ -1,4 +1,6 @@
 data/
+.idea/
+settings.json
 
 *.pyc
 

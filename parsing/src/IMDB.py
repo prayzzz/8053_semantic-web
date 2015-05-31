@@ -59,6 +59,7 @@ def convert_to_rdf():
 
             character = BNode()
             g.add((character, RDF.type, NS_IMDB.Character))
+            g.add((character, RDFS.label, Literal(cast["screen_name"])))
             g.add((character, NS_IMDB.actedBy, actor))
             g.add((character, NS_IMDB.screenName, Literal(cast["screen_name"])))
             g.add((movie, NS_IMDB.cast, character))
@@ -66,6 +67,8 @@ def convert_to_rdf():
         for info in m["release_info"]:
             release = BNode()
             g.add((release, RDF.type, NS_IMDB.ReleaseCountry))
+            g.add((release, RDFS.label,
+                   Literal(info["country"] if info["event"] == "" else info["country"] + " - " + info["event"])))
             g.add((release, NS_DBPEDIA_OWL.publicationDate, Literal(info["date"], datatype=XSD.datetime)))
             g.add((release, NS_DBPEDIA_OWL.comment, Literal(info["event"])))
             g.add((release, NS_DBPEDIA_OWL.country,
