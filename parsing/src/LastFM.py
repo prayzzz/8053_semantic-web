@@ -47,8 +47,9 @@ def convert_to_rdf():
         if "tags" in s:
             for t in s["tags"]:
                 tag = URIRef(BASE_URI % common.encodeString(t))
-                g.add((tag, NS_LASTFM.label, Literal(s)))
-                g.add((song, NS_DBPEDIA_OWL.tag, tag))
+                g.add((tag, RDF.type, NS_LASTFM.Tag))
+                g.add((tag, NS_DBPEDIA_OWL.label, Literal(t)))
+                g.add((song, NS_LASTFM.tagged, tag))
 
     common.write_rdf(RDF_OUT_FILE, g)
 
@@ -90,7 +91,7 @@ def load_from_web():
         if len(m["soundtrack"]) > 0:
             song_chunks.append(m["soundtrack"])
 
-    pool = Pool(1)
+    pool = Pool(5)
     worker = [pool.apply_async(process_songs, [chunk, network]) for chunk in song_chunks]
 
     lastfm_songs = []
