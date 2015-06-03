@@ -12,11 +12,13 @@ namespace Reasoner
     {
         private const string SettingsFile = "settings.json";
         
-        private const string referenceMoviesQuery = @"Queries\01_Reference_Movies.rq";
+        private const string ReferenceMoviesQuery = @"Queries\01_Reference_Movies.rq";
+        private const string ReferenceSongsQuery = @"Queries\02_Reference_Songs_Artists.rq";
         
         private const string TuneFindDbName = "tunefind";
         private const string ImdbDbName = "imdb";
         private const string MoviesDbName = "movies";
+        private const string LastFmDbName = "lastfm";
 
         private static Settings settings;
 
@@ -24,7 +26,8 @@ namespace Reasoner
         {
             settings = LoadSettings();
 
-            ReferenceMovies();
+            //ReferenceMovies();
+            ReferenceSongsAndArtists();
         }
 
         private static Settings LoadSettings()
@@ -54,7 +57,7 @@ namespace Reasoner
 
             tuneFindGraph.Merge(imdbGraph);
 
-            var queryResult = tuneFindGraph.ExecuteQuery(File.ReadAllText(referenceMoviesQuery));
+            var queryResult = tuneFindGraph.ExecuteQuery(File.ReadAllText(ReferenceMoviesQuery));
             if (!(queryResult is IGraph))
             {
                 throw new InvalidDataException("No Construct-Query");
@@ -72,6 +75,38 @@ namespace Reasoner
             var movieStore = new StardogConnector(settings.ServerIp, MoviesDbName, settings.Login, settings.Password);
             movieStore.DeleteGraph("http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#");
             movieStore.SaveGraph(movieGraph);
+        }
+
+        private static void ReferenceSongsAndArtists()
+        {
+            var movieStore = new StardogConnector(settings.ServerIp, MoviesDbName, settings.Login, settings.Password);
+            var movieGraph = new Graph();
+            movieStore.LoadGraph(movieGraph, "http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#");
+
+            var lastFmStore = new StardogConnector(settings.ServerIp, LastFmDbName, settings.Login, settings.Password);
+            var lastFmGraph = new Graph();
+            lastFmStore.LoadGraph(lastFmGraph, string.Empty);
+
+            movieGraph.Merge(lastFmGraph);
+
+            var queryResult = movieGraph.ExecuteQuery(File.ReadAllText(ReferenceSongsQuery));
+            if (!(queryResult is IGraph))
+            {
+                throw new InvalidDataException("No Construct-Query");
+            }
+
+            var movieSongArtistGraph = queryResult as IGraph;
+            movieSongArtistGraph.BaseUri = new Uri("http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#");
+            movieSongArtistGraph.NamespaceMap.AddNamespace("imdb", new Uri("http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#"));
+            movieSongArtistGraph.NamespaceMap.AddNamespace("lastfm", new Uri("http://imn.htwk-leipzig.de/pbachman/ontologies/lastfm#"));
+            movieSongArtistGraph.NamespaceMap.AddNamespace("tunefind", new Uri("http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#"));
+            movieSongArtistGraph.Merge(movieGraph);
+
+            var writer = new CompressingTurtleWriter(TurtleSyntax.W3C);
+            writer.Save(movieSongArtistGraph, "02_Movies_Songs.ttl");
+
+            movieStore.DeleteGraph("http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#");
+            movieStore.SaveGraph(movieSongArtistGraph);
         }
     }
 }

@@ -4,6 +4,9 @@ import common
 
 __author__ = 'prayzzz'
 
+'''
+unfinished skripts
+'''
 
 def process_song(s):
     result = musicbrainzngs.search_recordings(artist=s["artist"], release=s["title"], limit=1)

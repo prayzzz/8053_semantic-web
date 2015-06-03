@@ -50,7 +50,7 @@ def convert_to_rdf():
 
             song = URIRef(BASE_URI % common.encodeString(t["title"]))
             g.add((song, RDF.type, NS_DBPEDIA_OWL.Song))
-            g.add((song, RDFS.label, Literal(t["title"])))
+            g.add((song, RDFS.label, Literal(u"{0:s} - {1:s}".format(t['artist'], t["title"]))))
             g.add((song, NS_DBPPROP.title, Literal(t["title"])))
             g.add((song, NS_DBPEDIA_OWL.artist, artist))
 
@@ -58,7 +58,7 @@ def convert_to_rdf():
             g.add((ranked, RDF.type, NS_CHARTS.RankedSong))
             g.add((ranked, NS_CHARTS.song, song))
             g.add((ranked, NS_CHARTS.position, Literal(t["pos"], datatype=XSD.integer)))
-
+            g.add((ranked, RDFS.label, Literal(u"{0:s}: {1:s} - {2:s}".format(t["pos"], t['artist'], t["title"]))))
             g.add((chart, NS_CHARTS.rankedSong, ranked))
 
     common.write_rdf(RDF_OUT_FILE, g)

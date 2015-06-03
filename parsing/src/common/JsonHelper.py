@@ -19,4 +19,4 @@ def write_json(filepath, obj):
 def read_json(filepath):
     print "Reading %s..." % filepath
     with open(DIRECTORY + filepath, "r") as infile:
-        return json.load(infile)
+        return json.load(infile, encoding="utf8")

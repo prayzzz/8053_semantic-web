@@ -1,0 +1,36 @@
+﻿PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>
+PREFIX dbpprop: <http://dbpedia.org/property/>
+
+CONSTRUCT
+{
+    ?lastFmSong rdf:sameAs ?chartSong .
+    ?chartSong rdf:sameAs ?lastFmSong .  
+}
+WHERE
+{
+	?lastFmSong a dbpedia-owl:Song ;
+                dbpedia-owl:artist ?lastFmArtist ;
+                rdfs:label ?lastFmSongLabel .
+  
+  	?lastFmArtist a dbpedia-owl:MusicalArtist ;
+                  rdfs:label ?lastFmArtistLabel .
+  
+    FILTER(STRSTARTS(STR(?lastFmSong), "http://imn.htwk-leipzig.de/pbachman/ontologies/lastfm#"))
+  
+  	?chartSong a dbpedia-owl:Song ;
+               dbpedia-owl:artist ?chartArtist ;
+               rdfs:label ?chartSongLabel .
+  
+   	?chartArtist a dbpedia-owl:MusicalArtist ;
+                 rdfs:label ?chartArtistLabel .
+  
+    FILTER(STRSTARTS(STR(?chartSong), "http://imn.htwk-leipzig.de/pbachman/ontologies/charts#"))
+  
+
+    FILTER(lcase(STR(?lastFmSongLabel)) = lcase(STR(?chartSongLabel)))
+    FILTER(lcase(STR(?lastFmArtistLabel)) = lcase(STR(?chartArtistLabel)))
+}

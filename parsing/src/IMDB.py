@@ -82,7 +82,7 @@ def fetch_release_info(m):
     url = EP_IMDB_RELEASEINFO % m["imdb_id"]
     html = common.request_url(url)
 
-    soup = BeautifulSoup(html.replace("\n", ""))
+    soup = BeautifulSoup(html.replace("\n", ""), from_encoding="utf-8")
     info_row = soup.find(id="release_dates").find("tr")
 
     release_infos = []
@@ -152,7 +152,7 @@ def fetch_cast(m):
     url = EP_IMDB_CAST % m["imdb_id"]
     html = common.request_url(url)
 
-    soup = BeautifulSoup(html.replace("\n", ""))
+    soup = BeautifulSoup(html.replace("\n", ""), from_encoding="utf-8")
 
     # Director
     directors = extract_directors(soup)
