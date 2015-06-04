@@ -7,30 +7,30 @@ PREFIX dbpprop: <http://dbpedia.org/property/>
 
 CONSTRUCT
 {
-    ?lastFmSong rdf:sameAs ?chartSong .
-    ?chartSong rdf:sameAs ?lastFmSong .  
+    ?tunefindSong rdf:sameAs ?chartSong .
+    ?chartSong rdf:sameAs ?tunefindSong .  
 }
 WHERE
 {
-	?lastFmSong a dbpedia-owl:Song ;
-                dbpedia-owl:artist ?lastFmArtist ;
-                rdfs:label ?lastFmSongLabel .
+	?tunefindSong a dbpedia-owl:Song ;
+                dbpedia-owl:artist ?tunefindArtist ;
+                rdfs:label ?tunefindSongLabel .
   
-  	?lastFmArtist a dbpedia-owl:MusicalArtist ;
-                  rdfs:label ?lastFmArtistLabel .
+  	#?tunefindArtist a dbpedia-owl:MusicalArtist ;
+    #              rdfs:label ?tunefindArtistLabel .
   
-    FILTER(STRSTARTS(STR(?lastFmSong), "http://imn.htwk-leipzig.de/pbachman/ontologies/lastfm#"))
+    FILTER(STRSTARTS(STR(?tunefindSong), "http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#"))
   
   	?chartSong a dbpedia-owl:Song ;
                dbpedia-owl:artist ?chartArtist ;
                rdfs:label ?chartSongLabel .
   
-   	?chartArtist a dbpedia-owl:MusicalArtist ;
-                 rdfs:label ?chartArtistLabel .
+   	#?chartArtist a dbpedia-owl:MusicalArtist ;
+    #            rdfs:label ?chartArtistLabel .
   
     FILTER(STRSTARTS(STR(?chartSong), "http://imn.htwk-leipzig.de/pbachman/ontologies/charts#"))
   
 
-    FILTER(lcase(STR(?lastFmSongLabel)) = lcase(STR(?chartSongLabel)))
-    FILTER(lcase(STR(?lastFmArtistLabel)) = lcase(STR(?chartArtistLabel)))
+    FILTER(lcase(STR(?tunefindSongLabel)) = lcase(STR(?chartSongLabel)))
+    #FILTER(lcase(STR(?tunefindArtistLabel)) = lcase(STR(?chartArtistLabel)))
 }

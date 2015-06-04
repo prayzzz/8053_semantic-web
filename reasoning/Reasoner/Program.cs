@@ -14,6 +14,7 @@ namespace Reasoner
         
         private const string ReferenceMoviesQuery = @"Queries\01_Reference_Movies.rq";
         private const string ReferenceSongsQuery = @"Queries\02_Reference_Songs_Artists.rq";
+        private const string ReferenceChartSongsQuery = @"Queries\03_Reference_ChartSongs.rq";
         
         private const string TuneFindDbName = "tunefind";
         private const string ImdbDbName = "imdb";
@@ -27,7 +28,25 @@ namespace Reasoner
             settings = LoadSettings();
 
             //ReferenceMovies();
-            ReferenceSongsAndArtists();
+            //ReferenceSongsAndArtists();
+            ReferenceChartSongs();
+        }
+
+        private static void ReferenceChartSongs()
+        {
+            var charts = new Graph();
+            charts.LoadFromFile(@"E:\Projects\Studium\movie-soundtrack-events\data\full\imdb.ttl");
+
+            //var tunefind = new Graph();
+            //tunefind.LoadFromFile(@"E:\Projects\Studium\movie-soundtrack-events\data\full\tunefind.ttl");
+
+            //charts.Merge(tunefind);
+
+            var queryResult = charts.ExecuteQuery(File.ReadAllText(@"Queries\04_Get_ReleaseDates.rq"));
+            if (!(queryResult is IGraph))
+            {
+                throw new InvalidDataException("No Construct-Query");
+            }
         }
 
         private static Settings LoadSettings()
