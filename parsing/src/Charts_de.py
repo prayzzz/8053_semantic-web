@@ -17,8 +17,9 @@ JSON_OUT_FILE = "charts_de.json"
 RDF_OUT_FILE = "charts_de.ttl"
 LOAD_FROM_WEB = False
 CONVERT_TO_RDF = False
-STARTDATE = "01.01.1990"
+STARTDATE = "01.01.2000"
 ENDDATE = "31.05.2015"
+LIMIT = 50
 
 BASE_URI = "http://imn.htwk-leipzig.de/pbachman/ontologies/charts#%s"
 NS_CHARTS = Namespace("http://imn.htwk-leipzig.de/pbachman/ontologies/charts#")
@@ -91,6 +92,10 @@ def process_date(current_date):
         tracks.append(track)
 
         chart_row = chart_row.find_next_sibling("tr", class_="drill-down-link")
+
+        if pos == str(LIMIT):
+            break
+
     return chart
 
 
