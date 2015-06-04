@@ -42,44 +42,50 @@ def convert_to_rdf():
         g.add((movie, RDF.type, NS_DBPEDIA_OWL.Film))
         g.add((movie, RDFS.label, Literal(m["title"])))
         g.add((movie, NS_DBPPROP.title, Literal(m["title"])))
-        g.add((movie, NS_DBPEDIA_OWL.imdbId, Literal(m["imdb_id"])))
+        g.add((movie, NS_DBPEDIA_OWL.imdbId, Literal(m["imdbID"])))
 
-        for name in m["directors"]:
-            director = URIRef(BASE_URI % common.encodeString(name))
-            g.add((director, RDF.type, NS_DBPEDIA_OWL.Person))
-            g.add((director, RDFS.label, Literal(name)))
-            g.add((director, NS_DBPPROP.name, Literal(name)))
-            g.add((movie, NS_DBPEDIA_OWL.director, director))
+        if "directors" in m:
+            for name in m["directors"]:
+                director = URIRef(BASE_URI % common.encodeString(name))
+                g.add((director, RDF.type, NS_DBPEDIA_OWL.Person))
+                g.add((director, RDFS.label, Literal(name)))
+                g.add((director, NS_DBPPROP.name, Literal(name)))
+                g.add((movie, NS_DBPEDIA_OWL.director, director))
 
-        for cast in m["cast"]:
-            actor = URIRef(BASE_URI % common.encodeString(cast["name"]))
-            g.add((actor, RDF.type, NS_DBPEDIA_OWL.Actor))
-            g.add((actor, RDFS.label, Literal(cast["name"])))
-            g.add((actor, NS_DBPPROP.name, Literal(cast["name"])))
+        if "cast" in m:
+            for cast in m["cast"]:
+                actor = URIRef(BASE_URI % common.encodeString(cast["name"]))
+                g.add((actor, RDF.type, NS_DBPEDIA_OWL.Actor))
+                g.add((actor, RDFS.label, Literal(cast["name"])))
+                g.add((actor, NS_DBPPROP.name, Literal(cast["name"])))
 
-            character = BNode()
-            g.add((character, RDF.type, NS_IMDB.Character))
-            g.add((character, RDFS.label, Literal(cast["screen_name"])))
-            g.add((character, NS_IMDB.actedBy, actor))
-            g.add((character, NS_IMDB.screenName, Literal(cast["screen_name"])))
-            g.add((movie, NS_IMDB.cast, character))
+                character = BNode()
+                g.add((character, RDF.type, NS_IMDB.Character))
+                g.add((character, RDFS.label, Literal(cast["screen_name"])))
+                g.add((character, NS_IMDB.actedBy, actor))
+                g.add((character, NS_IMDB.screenName, Literal(cast["screen_name"])))
+                g.add((movie, NS_IMDB.cast, character))
 
-        for info in m["release_info"]:
-            release = BNode()
-            g.add((release, RDF.type, NS_IMDB.ReleaseCountry))
-            g.add((release, RDFS.label,
-                   Literal(info["country"] if info["event"] == "" else info["country"] + " - " + info["event"])))
-            g.add((release, NS_DBPEDIA_OWL.publicationDate, Literal(info["date"], datatype=XSD.datetime)))
-            g.add((release, NS_DBPEDIA_OWL.comment, Literal(info["event"])))
-            g.add((release, NS_DBPEDIA_OWL.country,
-                   URIRef("http://dbpedia.org/resource/%s" % common.encodeString(info["country"]))))
-            g.add((movie, NS_IMDB.releasedIn, release))
+        if "release_info" in m:
+            for info in m["release_info"]:
+                if "date" not in info:
+                    continue
+
+                release = BNode()
+                g.add((release, RDF.type, NS_IMDB.ReleaseCountry))
+                g.add((release, RDFS.label,
+                       Literal(info["country"] if info["event"] == "" else info["country"] + " - " + info["event"])))
+                g.add((release, NS_DBPEDIA_OWL.publicationDate, Literal(info["date"], datatype=XSD.datetime)))
+                g.add((release, NS_DBPEDIA_OWL.comment, Literal(info["event"])))
+                g.add((release, NS_DBPEDIA_OWL.country,
+                       URIRef("http://dbpedia.org/resource/%s" % common.encodeString(info["country"]))))
+                g.add((movie, NS_IMDB.releasedIn, release))
 
     common.write_rdf(RDF_OUT_FILE, g)
 
 
 def fetch_release_info(m):
-    url = EP_IMDB_RELEASEINFO % m["imdb_id"]
+    url = EP_IMDB_RELEASEINFO % m["imdbID"]
     html = common.request_url(url)
 
     soup = BeautifulSoup(html.replace("\n", ""), from_encoding="utf-8")
@@ -95,7 +101,10 @@ def fetch_release_info(m):
         try:
             info["date"] = datetime.strptime(date_tag.text.strip(), "%d %B %Y").strftime("%Y-%m-%dT%H:%M:%S")
         except ValueError:
-            info["date"] = datetime.strptime(date_tag.text.strip(), "%B %Y").strftime("%Y-%m-%dT%H:%M:%S")
+            try:
+                info["date"] = datetime.strptime(date_tag.text.strip(), "%B %Y").strftime("%Y-%m-%dT%H:%M:%S")
+            except ValueError:
+                pass
 
         event_tag = date_tag.find_next_sibling("td")
         info["event"] = event_tag.text.strip()
@@ -137,7 +146,7 @@ def extract_cast(soup):
         screen_name = screen_name_tag.text.strip()
         re_match = re.search("^(.+?)(\((\w|\W)+?\))?$", screen_name)
 
-        if len(re_match.groups()) < 2:
+        if re_match is None or len(re_match.groups()) < 2:
             actor["screen_name"] = screen_name
         else:
             actor["screen_name"] = re_match.group(1).strip()
@@ -149,7 +158,7 @@ def extract_cast(soup):
 
 
 def fetch_cast(m):
-    url = EP_IMDB_CAST % m["imdb_id"]
+    url = EP_IMDB_CAST % m["imdbID"]
     html = common.request_url(url)
 
     soup = BeautifulSoup(html.replace("\n", ""), from_encoding="utf-8")
@@ -164,11 +173,22 @@ def fetch_cast(m):
 
 
 def process_movie(m):
-    print "{0:35} {1:10}".format(m["title"], m["imdb_id"])
+    if "imdbID" not in m:
+        print "{0:35} no imdbID".format(m["title"])
+        return None
 
-    movie = {"title": m["title"], "imdb_id": m["imdb_id"]}
-    fetch_release_info(movie)
-    fetch_cast(movie)
+    print "{0:35} {1:10}".format(m["title"], m["imdbID"])
+
+    movie = {"title": m["title"], "imdbID": m["imdbID"]}
+    try:
+        fetch_release_info(movie)
+    except Exception, e:
+        print u"{0:s} - {1:s}".format(m["title"], e.message)
+
+    try:
+        fetch_cast(movie)
+    except Exception, e:
+        print u"{0:s} - {1:s}".format(m["title"], e.message)
 
     return movie
 
@@ -184,7 +204,9 @@ def load_from_web():
     imdb_movies = []
     for w in worker:
         w.wait()
-        imdb_movies.append(w.get())
+        result = w.get()
+        if result is not None:
+            imdb_movies.append(w.get())
 
     common.write_json(JSON_OUT_FILE, imdb_movies)
 

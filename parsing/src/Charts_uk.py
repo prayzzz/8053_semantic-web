@@ -16,8 +16,8 @@ JSON_OUT_FILE = "charts_uk.json"
 RDF_OUT_FILE = "charts_uk.ttl"
 LOAD_FROM_WEB = False
 CONVERT_TO_RDF = False
-STARTDATE = "07.12.2014"
-ENDDATE = "01.01.2015"
+STARTDATE = "07.01.1990"
+ENDDATE = "31.05.2015"
 
 BASE_URI = "http://imn.htwk-leipzig.de/pbachman/ontologies/charts#%s"
 NS_CHARTS = Namespace("http://imn.htwk-leipzig.de/pbachman/ontologies/charts#")

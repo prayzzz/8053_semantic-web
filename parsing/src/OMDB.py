@@ -41,7 +41,9 @@ def convert_to_rdf():
         g.add((movie, RDF.type, NS_DBPEDIA_OWL.Film))
         g.add((movie, RDFS.label, Literal(m["title"])))
         g.add((movie, NS_DBPPROP.title, Literal(m["title"])))
-        g.add((movie, NS_DBPEDIA_OWL.imdbId, Literal(m["imdb_id"])))
+
+        if "imdbID" in m:
+            g.add((movie, NS_DBPEDIA_OWL.imdbId, Literal(m["imdbID"])))
 
     common.write_rdf(RDF_OUT_FILE, g)
 
@@ -60,7 +62,11 @@ def process_movie(m):
     url = EP_OMDB % urllib2.quote(title)
     data = json.loads(common.request_url(url))
 
-    movie = {"title": m["title"], "imdb_id": data["imdbID"]}
+    if "Response" not in data or data["Response"] == "False":
+        print u"{0:s} not found".format(m["title"])
+        return None
+
+    movie = {"title": m["title"], "imdbID": data["imdbID"]}
     return movie
 
 
@@ -76,7 +82,9 @@ def load_from_web():
     omdb_movies = []
     for w in worker:
         w.wait()
-        omdb_movies.append(w.get())
+        result = w.get()
+        if result is not None:
+            omdb_movies.append(w.get())
 
     common.write_json(JSON_OUT_FILE, omdb_movies)
 
