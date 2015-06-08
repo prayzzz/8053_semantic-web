@@ -48,8 +48,9 @@ namespace Reasoner
             var processor = new LeviathanUpdateProcessor(store);
             processor.ProcessCommandSet(cmds);
 
-            //Now save the updated Graph back to disk
-            imdb.SaveToFile("ReducedMovies.rdf");
+            Console.WriteLine(DateTime.Now + " Writing Graph...");
+            var writer = new CompressingTurtleWriter(TurtleSyntax.W3C);
+            writer.Save(imdb, "02_ReducedMovies.ttl");
         }
 
         private static Settings LoadSettings()
