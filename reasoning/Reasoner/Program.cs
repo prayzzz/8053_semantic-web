@@ -11,11 +11,11 @@ namespace Reasoner
     class Program
     {
         private const string SettingsFile = "settings.json";
-        
+
         private const string ReferenceMoviesQuery = @"Queries\01_Reference_Movies.rq";
         private const string ReferenceSongsQuery = @"Queries\02_Reference_Songs_Artists.rq";
         private const string ReferenceChartSongsQuery = @"Queries\03_Reference_ChartSongs.rq";
-        
+
         private const string TuneFindDbName = "tunefind";
         private const string ImdbDbName = "imdb";
         private const string MoviesDbName = "movies";
@@ -27,15 +27,15 @@ namespace Reasoner
         {
             settings = LoadSettings();
 
-            //ReferenceMovies();
+            ReferenceMovies();
             //ReferenceSongsAndArtists();
-            ReferenceChartSongs();
+            //ReferenceChartSongs();
         }
 
         private static void ReferenceChartSongs()
         {
             var charts = new Graph();
-            charts.LoadFromFile(@"E:\Projects\Studium\movie-soundtrack-events\data\full\imdb.ttl");
+            charts.LoadFromFile(@"C:\Users\Patrick\Projects\Studium\movie-soundtrack-events\parsing\src\data\imdb.ttl");
 
             //var tunefind = new Graph();
             //tunefind.LoadFromFile(@"E:\Projects\Studium\movie-soundtrack-events\data\full\tunefind.ttl");
@@ -66,16 +66,20 @@ namespace Reasoner
 
         private static void ReferenceMovies()
         {
+            Console.WriteLine(DateTime.Now + "Connecting to Tunefind store...");
             var tuneFindStore = new StardogConnector(settings.ServerIp, TuneFindDbName, settings.Login, settings.Password);
             var tuneFindGraph = new Graph();
             tuneFindStore.LoadGraph(tuneFindGraph, string.Empty);
 
+            Console.WriteLine(DateTime.Now + "Connecting to IMDB store...");
             var imdbStore = new StardogConnector(settings.ServerIp, ImdbDbName, settings.Login, settings.Password);
             var imdbGraph = new Graph();
             imdbStore.LoadGraph(imdbGraph, string.Empty);
 
+            Console.WriteLine(DateTime.Now + "Merging graphs...");
             tuneFindGraph.Merge(imdbGraph);
 
+            Console.WriteLine(DateTime.Now + "Constructing new graph...");
             var queryResult = tuneFindGraph.ExecuteQuery(File.ReadAllText(ReferenceMoviesQuery));
             if (!(queryResult is IGraph))
             {
@@ -88,9 +92,11 @@ namespace Reasoner
             movieGraph.NamespaceMap.AddNamespace("tunefind", new Uri("http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#"));
             movieGraph.Merge(tuneFindGraph);
 
+            Console.WriteLine(DateTime.Now + "Writing Graph...");
             var writer = new CompressingTurtleWriter(TurtleSyntax.W3C);
             writer.Save(movieGraph, "01_Movies.ttl");
 
+            Console.WriteLine(DateTime.Now + "Uploading Graph...");
             var movieStore = new StardogConnector(settings.ServerIp, MoviesDbName, settings.Login, settings.Password);
             movieStore.DeleteGraph("http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#");
             movieStore.SaveGraph(movieGraph);

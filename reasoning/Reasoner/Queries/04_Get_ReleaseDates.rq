@@ -10,10 +10,10 @@ SELECT ?date
 WHERE
 {
 	?m a dbpedia-owl:Film ;
-       :releasedIn ?r.
+       imdb:releasedIn ?r.
 
     ?r dbpedia-owl:publicationDate ?date
 
-    FILTER ( xsd:datetime(?date) >= "2005-01-01T00:00:00"^^xsd:datetime )
+    FILTER (?date >= "2000-01-01T00:00:00Z"^^xsd:dateTime)
 }
 ORDER BY ?date

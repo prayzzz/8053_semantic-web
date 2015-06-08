@@ -75,7 +75,7 @@ def convert_to_rdf():
                 g.add((release, RDF.type, NS_IMDB.ReleaseCountry))
                 g.add((release, RDFS.label,
                        Literal(info["country"] if info["event"] == "" else info["country"] + " - " + info["event"])))
-                g.add((release, NS_DBPEDIA_OWL.publicationDate, Literal(info["date"], datatype=XSD.datetime)))
+                g.add((release, NS_DBPEDIA_OWL.publicationDate, Literal(info["date"] + "Z", datatype=XSD.dateTime)))
                 g.add((release, NS_DBPEDIA_OWL.comment, Literal(info["event"])))
                 g.add((release, NS_DBPEDIA_OWL.country,
                        URIRef("http://dbpedia.org/resource/%s" % common.encodeString(info["country"]))))

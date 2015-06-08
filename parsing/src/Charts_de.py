@@ -42,7 +42,7 @@ def convert_to_rdf():
         chart = URIRef(
             BASE_URI % common.encodeString(datetime.strptime(c["date"], "%Y-%m-%dT%H:%M:%S").strftime("%Y-%m-%d")))
         g.add((chart, RDF.type, NS_CHARTS.Chart))
-        g.add((chart, NS_DBPEDIA_OWL.publicationDate, Literal(c["date"], datatype=XSD.datetime)))
+        g.add((chart, NS_DBPEDIA_OWL.publicationDate, Literal(c["date"] + "Z", datatype=XSD.dateTime)))
 
         for t in c["tracks"]:
             artist = URIRef(BASE_URI % common.encodeString(t["artist"]))
