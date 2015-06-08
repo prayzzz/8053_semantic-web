@@ -3,7 +3,9 @@ using System.IO;
 using Newtonsoft.Json;
 using VDS.RDF;
 using VDS.RDF.Parsing;
+using VDS.RDF.Query;
 using VDS.RDF.Storage;
+using VDS.RDF.Update;
 using VDS.RDF.Writing;
 
 namespace Reasoner
@@ -27,26 +29,27 @@ namespace Reasoner
         {
             settings = LoadSettings();
 
-            ReferenceMovies();
+            //ReferenceMovies();
             //ReferenceSongsAndArtists();
-            //ReferenceChartSongs();
+            ReferenceChartSongs();
         }
 
         private static void ReferenceChartSongs()
         {
-            var charts = new Graph();
-            charts.LoadFromFile(@"C:\Users\Patrick\Projects\Studium\movie-soundtrack-events\parsing\src\data\imdb.ttl");
+            var imdb = new Graph();
+            imdb.LoadFromFile(@"E:\Projects\Studium\movie-soundtrack-events\parsing\src\data\full\imdb.ttl");
+            imdb.BaseUri = new Uri("http://imn.htwk-leipzig.de/pbachman/ontologies/imdb");
 
-            //var tunefind = new Graph();
-            //tunefind.LoadFromFile(@"E:\Projects\Studium\movie-soundtrack-events\data\full\tunefind.ttl");
+            var store = new TripleStore();
+            store.Add(imdb);
 
-            //charts.Merge(tunefind);
+            var parser = new SparqlUpdateParser();
+            var cmds = parser.ParseFromString(File.ReadAllText(@"Queries\05_Reduce_IMDB.rq"));
+            var processor = new LeviathanUpdateProcessor(store);
+            processor.ProcessCommandSet(cmds);
 
-            var queryResult = charts.ExecuteQuery(File.ReadAllText(@"Queries\04_Get_ReleaseDates.rq"));
-            if (!(queryResult is IGraph))
-            {
-                throw new InvalidDataException("No Construct-Query");
-            }
+            //Now save the updated Graph back to disk
+            imdb.SaveToFile("ReducedMovies.rdf");
         }
 
         private static Settings LoadSettings()
@@ -66,20 +69,20 @@ namespace Reasoner
 
         private static void ReferenceMovies()
         {
-            Console.WriteLine(DateTime.Now + "Connecting to Tunefind store...");
+            Console.WriteLine(DateTime.Now + " Connecting to Tunefind store...");
             var tuneFindStore = new StardogConnector(settings.ServerIp, TuneFindDbName, settings.Login, settings.Password);
             var tuneFindGraph = new Graph();
             tuneFindStore.LoadGraph(tuneFindGraph, string.Empty);
 
-            Console.WriteLine(DateTime.Now + "Connecting to IMDB store...");
+            Console.WriteLine(DateTime.Now + " Connecting to IMDB store...");
             var imdbStore = new StardogConnector(settings.ServerIp, ImdbDbName, settings.Login, settings.Password);
             var imdbGraph = new Graph();
             imdbStore.LoadGraph(imdbGraph, string.Empty);
 
-            Console.WriteLine(DateTime.Now + "Merging graphs...");
+            Console.WriteLine(DateTime.Now + " Merging graphs...");
             tuneFindGraph.Merge(imdbGraph);
 
-            Console.WriteLine(DateTime.Now + "Constructing new graph...");
+            Console.WriteLine(DateTime.Now + " Constructing new graph...");
             var queryResult = tuneFindGraph.ExecuteQuery(File.ReadAllText(ReferenceMoviesQuery));
             if (!(queryResult is IGraph))
             {
@@ -92,11 +95,11 @@ namespace Reasoner
             movieGraph.NamespaceMap.AddNamespace("tunefind", new Uri("http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#"));
             movieGraph.Merge(tuneFindGraph);
 
-            Console.WriteLine(DateTime.Now + "Writing Graph...");
+            Console.WriteLine(DateTime.Now + " Writing Graph...");
             var writer = new CompressingTurtleWriter(TurtleSyntax.W3C);
             writer.Save(movieGraph, "01_Movies.ttl");
 
-            Console.WriteLine(DateTime.Now + "Uploading Graph...");
+            Console.WriteLine(DateTime.Now + " Uploading Graph...");
             var movieStore = new StardogConnector(settings.ServerIp, MoviesDbName, settings.Login, settings.Password);
             movieStore.DeleteGraph("http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#");
             movieStore.SaveGraph(movieGraph);
@@ -104,16 +107,20 @@ namespace Reasoner
 
         private static void ReferenceSongsAndArtists()
         {
+            Console.WriteLine(DateTime.Now + " Connecting to Movie store...");
             var movieStore = new StardogConnector(settings.ServerIp, MoviesDbName, settings.Login, settings.Password);
             var movieGraph = new Graph();
             movieStore.LoadGraph(movieGraph, "http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#");
 
+            Console.WriteLine(DateTime.Now + " Connecting to LastFM store...");
             var lastFmStore = new StardogConnector(settings.ServerIp, LastFmDbName, settings.Login, settings.Password);
             var lastFmGraph = new Graph();
             lastFmStore.LoadGraph(lastFmGraph, string.Empty);
 
+            Console.WriteLine(DateTime.Now + " Merging Graphs...");
             movieGraph.Merge(lastFmGraph);
 
+            Console.WriteLine(DateTime.Now + " Constructing new Graph...");
             var queryResult = movieGraph.ExecuteQuery(File.ReadAllText(ReferenceSongsQuery));
             if (!(queryResult is IGraph))
             {
@@ -127,11 +134,13 @@ namespace Reasoner
             movieSongArtistGraph.NamespaceMap.AddNamespace("tunefind", new Uri("http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#"));
             movieSongArtistGraph.Merge(movieGraph);
 
+            Console.WriteLine(DateTime.Now + " Writing Graph...");
             var writer = new CompressingTurtleWriter(TurtleSyntax.W3C);
             writer.Save(movieSongArtistGraph, "02_Movies_Songs.ttl");
 
-            movieStore.DeleteGraph("http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#");
-            movieStore.SaveGraph(movieSongArtistGraph);
+            Console.WriteLine(DateTime.Now + " Uploading Graph...");
+           // movieStore.DeleteGraph("http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#");
+           // movieStore.SaveGraph(movieSongArtistGraph);
         }
     }
 }

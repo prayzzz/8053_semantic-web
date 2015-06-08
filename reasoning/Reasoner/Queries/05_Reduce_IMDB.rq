@@ -1,0 +1,33 @@
+﻿PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX : <http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#>
+PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>
+PREFIX dbpprop: <http://dbpedia.org/property/>
+
+WITH <http://imn.htwk-leipzig.de/pbachman/ontologies/imdb>
+DELETE 
+{ 
+    ?movie a dbpedia-owl:Film ;
+           rdfs:label ?a;
+           dbpedia-owl:director ?b ;
+           dbpedia-owl:imdbId ?c  ;
+           dbpprop:title ?d ;
+           :releasedIn ?rCountry ;
+           :cast ?cast .
+}
+WHERE
+{
+	?movie a dbpedia-owl:Film ;
+           rdfs:label ?a;
+           dbpedia-owl:director ?b ;
+           dbpedia-owl:imdbId ?c  ;
+           dbpprop:title ?d ;
+           :releasedIn ?rCountry ;
+           :cast ?cast.
+
+    ?rCountry dbpedia-owl:publicationDate ?rDate
+
+    FILTER (?rDate < "2000-01-01T00:00:00Z"^^xsd:dateTime)
+}
