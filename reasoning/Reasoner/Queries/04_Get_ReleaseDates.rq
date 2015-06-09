@@ -9,7 +9,7 @@ PREFIX : <http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#>
 SELECT ?date
 WHERE
 {
-	?m a dbpedia-owl:Film ;
+    ?m a dbpedia-owl:Film ;
        imdb:releasedIn ?r.
 
     ?r dbpedia-owl:publicationDate ?date

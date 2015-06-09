@@ -25,6 +25,22 @@ NS_IMDB = Namespace("http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#")
 NS_DBPEDIA_OWL = Namespace("http://dbpedia.org/ontology/")
 NS_DBPPROP = Namespace("http://dbpedia.org/property/")
 
+def releaseFilter(movie):
+    def getDate(r):
+        if "date" in r:
+            return r["date"]
+        else:
+            return "9999-01-01T00:00:00"
+
+    sortedReleaseInfo = sorted(movie["release_info"], key=getDate)
+
+    for ri in sortedReleaseInfo:
+        if "date" not in ri:
+            continue
+        if ri["date"] < "2000-01-01T00:00:00":
+            return False
+        else:
+            return True
 
 def convert_to_rdf():
     print ""
@@ -38,6 +54,9 @@ def convert_to_rdf():
     g.bind("dbpprop", NS_DBPPROP)
 
     for m in movies:
+        if not releaseFilter(m):
+            continue
+
         movie = URIRef(BASE_URI % common.encodeString(m["title"]))
         g.add((movie, RDF.type, NS_DBPEDIA_OWL.Film))
         g.add((movie, RDFS.label, Literal(m["title"])))
@@ -53,7 +72,10 @@ def convert_to_rdf():
                 g.add((movie, NS_DBPEDIA_OWL.director, director))
 
         if "cast" in m:
-            for cast in m["cast"]:
+            for cast in m["cast"][:10]:
+                if cast["screen_name"] == "":
+                    continue
+
                 actor = URIRef(BASE_URI % common.encodeString(cast["name"]))
                 g.add((actor, RDF.type, NS_DBPEDIA_OWL.Actor))
                 g.add((actor, RDFS.label, Literal(cast["name"])))
@@ -69,6 +91,9 @@ def convert_to_rdf():
         if "release_info" in m:
             for info in m["release_info"]:
                 if "date" not in info:
+                    continue
+
+                if info["country"] != "UK" and info["country"] != "Germany" and info["country"] != "USA":
                     continue
 
                 release = BNode()

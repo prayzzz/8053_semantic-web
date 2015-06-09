@@ -69,7 +69,13 @@
     <None Include="Queries\01_Reference_Movies.rq">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Queries\05_Reduce_IMDB.rq">
+    <None Include="Queries\05a_Remove_ObsoleteFilms.rq">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Queries\05b_Remove_ObsoleteTunefindSongs.rq">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Queries\05c_Remove_ObsoleteArtists.rq">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Queries\04_Get_ReleaseDates.rq">

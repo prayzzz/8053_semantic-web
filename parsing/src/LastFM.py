@@ -33,6 +33,9 @@ def convert_to_rdf():
     g.bind("dbpprop", NS_DBPPROP)
 
     for s in songs:
+        if "tags" not in s or len(s["tags"]) < 1:
+            continue
+
         artist = URIRef(BASE_URI % common.encodeString(s["artist"]))
         g.add((artist, RDF.type, NS_DBPEDIA_OWL.MusicalArtist))
         g.add((artist, RDFS.label, Literal(s["artist"])))
@@ -44,12 +47,8 @@ def convert_to_rdf():
         g.add((song, NS_DBPPROP.title, Literal(s["title"])))
         g.add((song, NS_DBPEDIA_OWL.artist, artist))
 
-        if "tags" in s:
-            for t in s["tags"]:
-                tag = URIRef(BASE_URI % common.encodeString(t))
-                g.add((tag, RDF.type, NS_LASTFM.Tag))
-                g.add((tag, NS_DBPEDIA_OWL.label, Literal(t)))
-                g.add((song, NS_LASTFM.tagged, tag))
+        for t in s["tags"]:
+            g.add((song, NS_LASTFM.tagged, Literal(t)))
 
     common.write_rdf(RDF_OUT_FILE, g)
 
