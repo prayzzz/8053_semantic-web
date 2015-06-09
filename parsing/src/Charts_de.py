@@ -21,8 +21,8 @@ STARTDATE = "01.01.2000"
 ENDDATE = "31.05.2015"
 LIMIT = 50
 
-BASE_URI = "http://imn.htwk-leipzig.de/pbachman/ontologies/charts#%s"
-NS_CHARTS = Namespace("http://imn.htwk-leipzig.de/pbachman/ontologies/charts#")
+BASE_URI = "http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#%s"
+NS_CHARTS = Namespace("http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#")
 NS_DBPEDIA_OWL = Namespace("http://dbpedia.org/ontology/")
 NS_DBPPROP = Namespace("http://dbpedia.org/property/")
 

@@ -5,16 +5,18 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>
 PREFIX dbpprop: <http://dbpedia.org/property/>
 
-WITH <http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#>
 DELETE 
-{
-    ?artist ?a ?b .
+{   
+    GRAPH <http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#>
+    {
+        ?artist ?a ?b .
+    }
 }
+USING <http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#>
 WHERE
 {
     ?artist a dbpedia-owl:MusicalArtist;
-          ?a ?b .
+            ?a ?b .
                      
-    MINUS { ?s dbpedia-owl:artist ?artist }
-    
+    MINUS { ?s dbpedia-owl:artist ?artist }    
 }

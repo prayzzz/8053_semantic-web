@@ -5,7 +5,6 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>
 PREFIX dbpprop: <http://dbpedia.org/property/>
 
-WITH <http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#>
 INSERT
 {
     GRAPH <http://imn.htwk-leipzig.de/pbachman/ontologies/references#>
@@ -14,6 +13,7 @@ INSERT
         ?tunefindFilm owl:sameAs ?imdbFilm .
     }
 }
+USING <http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#>
 WHERE
 {
     ?imdbFilm rdf:type dbpedia-owl:Film ;

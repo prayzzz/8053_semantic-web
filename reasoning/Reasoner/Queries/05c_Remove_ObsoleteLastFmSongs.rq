@@ -6,18 +6,20 @@ PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>
 PREFIX dbpprop: <http://dbpedia.org/property/>
 
 DELETE 
-{   
+{
     GRAPH <http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#>
     {
-        ?movie ?a ?b .
+        ?song ?a ?b .
     }
 }
 USING <http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#>
 USING <http://imn.htwk-leipzig.de/pbachman/ontologies/references#>
 WHERE
 {
-    ?movie a dbpedia-owl:Film ;
-                    ?a ?b .    
-
-    MINUS { ?movie owl:sameAs ?x . }
+    ?song a dbpedia-owl:Song ;
+          ?a ?b .
+                     
+    MINUS { ?song owl:sameAs ?x . }    
+        
+    FILTER(STRSTARTS(STR(?song), "http://imn.htwk-leipzig.de/pbachman/ontologies/lastfm#"))
 }

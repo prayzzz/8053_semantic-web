@@ -25,16 +25,16 @@ NS_IMDB = Namespace("http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#")
 NS_DBPEDIA_OWL = Namespace("http://dbpedia.org/ontology/")
 NS_DBPPROP = Namespace("http://dbpedia.org/property/")
 
-def releaseFilter(movie):
-    def getDate(r):
+def release_filter(movie):
+    def get_date(r):
         if "date" in r:
             return r["date"]
         else:
             return "9999-01-01T00:00:00"
 
-    sortedReleaseInfo = sorted(movie["release_info"], key=getDate)
+    sorted_release_info = sorted(movie["release_info"], key=get_date)
 
-    for ri in sortedReleaseInfo:
+    for ri in sorted_release_info:
         if "date" not in ri:
             continue
         if ri["date"] < "2000-01-01T00:00:00":
@@ -54,7 +54,7 @@ def convert_to_rdf():
     g.bind("dbpprop", NS_DBPPROP)
 
     for m in movies:
-        if not releaseFilter(m):
+        if not release_filter(m):
             continue
 
         movie = URIRef(BASE_URI % common.encodeString(m["title"]))

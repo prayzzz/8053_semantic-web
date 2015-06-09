@@ -5,33 +5,35 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>
 PREFIX dbpprop: <http://dbpedia.org/property/>
 
-WITH <http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#>
 INSERT
 {
-    ?tunefindSong owl:sameAs ?lastfmSong .
-    ?lastfmSong owl:sameAs ?tunefindSong .
+    GRAPH <http://imn.htwk-leipzig.de/pbachman/ontologies/references#>
+    {
+        ?tunefindSong owl:sameAs ?lastfmSong .
+        ?lastfmSong owl:sameAs ?tunefindSong .
 
-    ?tunefindArtist owl:sameAs ?lastFmArtist .
-    ?lastFmArtist owl:sameAs ?tunefindArtist .
+        ?tunefindArtist owl:sameAs ?lastFmArtist .
+        ?lastFmArtist owl:sameAs ?tunefindArtist .
+    }
 }
 USING <http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#>
 WHERE
 {
     ?tunefindSong a dbpedia-owl:Song ;
-                dbpedia-owl:artist ?tunefindArtist ;
-                dbpprop:title ?tunefindSongTitle .
+                  dbpedia-owl:artist ?tunefindArtist ;
+                  dbpprop:title ?tunefindSongTitle .
 
     ?tunefindArtist a dbpedia-owl:MusicalArtist ;
-                  dbpprop:name ?tunefindArtistName .
+                    dbpprop:name ?tunefindArtistName .
 
     FILTER(STRSTARTS(STR(?tunefindSong), "http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#"))
 
     ?lastfmSong a dbpedia-owl:Song ;
-               dbpedia-owl:artist ?lastfmArtist ;
-               dbpprop:title ?lastfmSongTitle .
+                dbpedia-owl:artist ?lastfmArtist ;
+                dbpprop:title ?lastfmSongTitle .
 
     ?lastfmArtist a dbpedia-owl:MusicalArtist ;
-                 dbpprop:name ?lastfmArtistName .
+                  dbpprop:name ?lastfmArtistName .
 
     FILTER(STRSTARTS(STR(?lastfmSong), "http://imn.htwk-leipzig.de/pbachman/ontologies/lastfm#"))
 

@@ -66,7 +66,7 @@
     <None Include="Queries\02_Reference_Songs_Artists.rq">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Queries\01_Reference_Movies.rq">
+    <None Include="Queries\01_Reference_Films.rq">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Queries\05a_Remove_ObsoleteFilms.rq">
@@ -75,7 +75,10 @@
     <None Include="Queries\05b_Remove_ObsoleteTunefindSongs.rq">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Queries\05c_Remove_ObsoleteArtists.rq">
+    <None Include="Queries\05c_Remove_ObsoleteLastFmSongs.rq">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Queries\05d_Remove_ObsoleteArtists.rq">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Queries\04_Get_ReleaseDates.rq">
@@ -90,7 +93,7 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Queries\03_Reference_ChartSongs.rq">
+    <None Include="Queries\03_Reference_ChartDe.rq">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
