@@ -35,8 +35,9 @@ namespace Reasoner
 
             //MergeGraphs();
             AddReferenceGraph();
-            RemoveObsoleteTriples();
+            //RemoveObsoleteTriples();
 
+            Console.WriteLine(DateTime.Now + " Finished...");
             Console.Read();
         }
 
@@ -51,7 +52,7 @@ namespace Reasoner
             var graph = new Graph();
             graph.LoadFromFile(@"E:\Projects\Studium\movie-soundtrack-events\data\01_Movies.ttl");
             graph.BaseUri = new Uri("http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#");
-            
+
             Console.WriteLine(DateTime.Now + " Uploading Graph...");
             movieStore.SaveGraph(graph);
 
@@ -62,30 +63,57 @@ namespace Reasoner
         {
             Console.WriteLine(DateTime.Now + " Connecting to Movie store...");
             var movieStore = new StardogConnector(settings.ServerIp, MoviesDbName, settings.Login, settings.Password);
-            movieStore.DeleteGraph("http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#");
             movieStore.Timeout = int.MaxValue;
 
+            #region Tunefind
             Console.WriteLine(DateTime.Now + " Connecting to Tunefind store...");
             var tuneFindStore = new StardogConnector(settings.ServerIp, TuneFindDbName, settings.Login, settings.Password);
             var tuneFindGraph = new Graph();
+            tuneFindGraph.BaseUri = new Uri("http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#");
             tuneFindStore.LoadGraph(tuneFindGraph, string.Empty);
 
+            Console.WriteLine(DateTime.Now + " Uploading Graph...");
+            movieStore.DeleteGraph("http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#");
+            movieStore.SaveGraph(tuneFindGraph);
+            #endregion
+
+            #region IMDB
             Console.WriteLine(DateTime.Now + " Connecting to IMDB store...");
             var imdbStore = new StardogConnector(settings.ServerIp, ImdbDbName, settings.Login, settings.Password);
             var imdbGraph = new Graph();
+            imdbGraph.BaseUri = new Uri("http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#");
             imdbStore.LoadGraph(imdbGraph, string.Empty);
 
+            Console.WriteLine(DateTime.Now + " Uploading Graph...");
+            movieStore.DeleteGraph("http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#");
+            movieStore.SaveGraph(imdbGraph);
+            #endregion
+
+            #region LastFM
             Console.WriteLine(DateTime.Now + " Connecting to LastFm store...");
             var lastFmStore = new StardogConnector(settings.ServerIp, LastFmDbName, settings.Login, settings.Password);
             var lastFmGraph = new Graph();
+            lastFmGraph.BaseUri = new Uri("http://imn.htwk-leipzig.de/pbachman/ontologies/lastfm#");
             lastFmStore.LoadGraph(lastFmGraph, string.Empty);
 
+            Console.WriteLine(DateTime.Now + " Uploading Graph...");
+            movieStore.DeleteGraph("http://imn.htwk-leipzig.de/pbachman/ontologies/lastfm#");
+            movieStore.SaveGraph(lastFmGraph);
+            #endregion
+
+            #region Charts_de
             Console.WriteLine(DateTime.Now + " Connecting to Chart_De store...");
             var chartsDeStore = new StardogConnector(settings.ServerIp, ChartsDeDbName, settings.Login, settings.Password);
             var chartsDeGraph = new Graph();
+            chartsDeGraph.BaseUri = new Uri("http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#");
             chartsDeStore.LoadGraph(chartsDeGraph, string.Empty);
 
-            Console.WriteLine(DateTime.Now + " Merging graphs...");
+            Console.WriteLine(DateTime.Now + " Uploading Graph...");
+            movieStore.DeleteGraph("http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#");
+            movieStore.SaveGraph(chartsDeGraph);
+            #endregion
+
+            Console.WriteLine(DateTime.Now + " Merging Graphs...");
             var movieGraph = SetupMovieGraph();
             movieGraph.Merge(tuneFindGraph);
             movieGraph.Merge(imdbGraph);
@@ -95,10 +123,6 @@ namespace Reasoner
             Console.WriteLine(DateTime.Now + " Writing Graph...");
             var writer = new CompressingTurtleWriter(TurtleSyntax.W3C);
             writer.Save(movieGraph, @"01_Movies.ttl");
-
-            Console.WriteLine(DateTime.Now + " Uploading Graph...");
-            movieStore.DeleteGraph("http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#");
-            movieStore.SaveGraph(movieGraph);
         }
 
         private static void AddReferenceGraph()
@@ -114,8 +138,8 @@ namespace Reasoner
             Console.WriteLine(DateTime.Now + " Inserting Song and Artists references...");
             movieStore.Query(File.ReadAllText(ReferenceSongsArtistsQuery));
 
-            Console.WriteLine(DateTime.Now + " Inserting Chart references...");
-            movieStore.Query(File.ReadAllText(ReferenceChartsDeQuery));
+            //Console.WriteLine(DateTime.Now + " Inserting Chart references...");
+            //movieStore.Query(File.ReadAllText(ReferenceChartsDeQuery));
         }
 
         private static void RemoveObsoleteTriples()

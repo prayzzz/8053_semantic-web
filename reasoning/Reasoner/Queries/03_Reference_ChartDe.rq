@@ -12,20 +12,20 @@ CONSTRUCT
 }
 WHERE
 {
-	?tunefindSong a dbpedia-owl:Song ;
+    ?tunefindSong a dbpedia-owl:Song ;
                 dbpedia-owl:artist ?tunefindArtist ;
                 dbpprop:title ?tunefindSongTitle .
 
-  	?tunefindArtist a dbpedia-owl:MusicalArtist ;
+    ?tunefindArtist a dbpedia-owl:MusicalArtist ;
                   dbpprop:name ?tunefindArtistName .
 
     FILTER(STRSTARTS(STR(?tunefindSong), "http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#"))
 
-  	?chartSong a dbpedia-owl:Song ;
+    ?chartSong a dbpedia-owl:Song ;
                dbpedia-owl:artist ?chartArtist ;
                dbpprop:title ?chartSongTitle .
 
-   	?chartArtist a dbpedia-owl:MusicalArtist ;
+    ?chartArtist a dbpedia-owl:MusicalArtist ;
                  dbpprop:name ?chartArtistName .
 
     FILTER(STRSTARTS(STR(?chartSong), "http://imn.htwk-leipzig.de/pbachman/ontologies/charts#"))

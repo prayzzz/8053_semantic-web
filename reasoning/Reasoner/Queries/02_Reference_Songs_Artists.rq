@@ -16,7 +16,8 @@ INSERT
         ?lastFmArtist owl:sameAs ?tunefindArtist .
     }
 }
-USING <http://imn.htwk-leipzig.de/pbachman/ontologies/movie-soundtracks#>
+USING <http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#>
+USING <http://imn.htwk-leipzig.de/pbachman/ontologies/lastfm#>
 WHERE
 {
     ?tunefindSong a dbpedia-owl:Song ;
