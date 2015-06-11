@@ -1,0 +1,38 @@
+# Lieder müssen in einem Film vorkommen
+# Die Chartposition der Lieder werden ausgegeben, wenn sie nach dem Release
+# des Filmes (Deutschland) in den Charts waren
+
+SELECT ?movieName ?songName ?chartDate ?rDate ?pos
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/lastfm#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/references#>
+WHERE
+{   
+	?imdbMovie rdfs:label ?movieName;
+               imdb:releasedIn ?rc ;               
+               owl:sameAs ?tfMovie .
+  
+    ?rc rdfs:label "Germany";
+        dbpedia-owl:publicationDate ?rDate
+  
+    FILTER(STRSTARTS(STR(?imdbMovie), "http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#"))
+    
+    ?tfMovie tunefind:contains ?tfSong .
+  
+    ?tfSong owl:sameAs ?cSong .  
+    ?cSong rdfs:label ?songName .
+    
+    FILTER(STRSTARTS(STR(?cSong), "http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#"))  
+  
+    ?chart a charts_de:Chart;
+           dbpedia-owl:publicationDate ?chartDate ;
+           charts_de:rankedSong ?r .
+  
+    ?r charts_de:song ?cSong ;
+       charts_de:position ?pos.
+  
+  FILTER (STR(?chartDate) > STR(?rDate))
+}
+ORDER BY ?movieName ?songName ?chartDate

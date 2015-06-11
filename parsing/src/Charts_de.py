@@ -53,7 +53,7 @@ def convert_to_rdf():
             g.add((artist, RDFS.label, Literal(t["artist"])))
             g.add((artist, NS_DBPPROP.name, Literal(t["artist"])))
 
-            song = URIRef(BASE_URI % common.encodeString(t["title"]))
+            song = URIRef(BASE_URI % common.encodeString(u"{0:s} - {1:s}".format(t['artist'],  t["title"])))
             g.add((song, RDF.type, NS_DBPEDIA_OWL.Song))
             g.add((song, RDFS.label, Literal(u"{0:s} - {1:s}".format(t['artist'], t["title"]))))
             g.add((song, NS_DBPPROP.title, Literal(t["title"])))

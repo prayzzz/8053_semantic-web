@@ -8,6 +8,7 @@ import StringIO
 from time import sleep
 
 from rdflib import Namespace, Graph, URIRef, RDF, RDFS, Literal
+import re
 
 import common
 
@@ -29,6 +30,10 @@ NS_TUNEFIND = Namespace("http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind
 NS_DBPEDIA_OWL = Namespace("http://dbpedia.org/ontology/")
 NS_DBPPROP = Namespace("http://dbpedia.org/property/")
 
+
+def check_for_track(g, title):
+    query = "ASK WHERE { ?song a dbpedia-owl:Song; dbpprop:title ?title . FILTER (?title = \"%s\")  }"
+    return g.query(query % title).askAnswer
 
 def convert_to_rdf():
     print ""
@@ -53,10 +58,10 @@ def convert_to_rdf():
             g.add((artist, RDFS.label, Literal(s["artist"])))
             g.add((artist, NS_DBPPROP.name, Literal(s["artist"])))
 
-            song = URIRef(BASE_URI % common.encodeString(s["title"]))
+            song = URIRef(BASE_URI % common.encodeString(u"{0:s} - {1:s}".format(s['artist'],  s["title"])))
             g.add((song, RDF.type, NS_DBPEDIA_OWL.Song))
-            g.add((song, RDFS.label, Literal(u"{0:s} - {1:s}".format(s['artist'], s["title"]))))
-            g.add((song, NS_DBPPROP.title, Literal(s["title"])))
+            g.add((song, RDFS.label, Literal(u"{0:s} - {1:s}".format(s['artist'],  s["title"]))))
+            g.add((song, NS_DBPPROP.title, Literal( s["title"])))
             g.add((song, NS_DBPEDIA_OWL.artist, artist))
 
             g.add((movie, NS_TUNEFIND.contains, song))

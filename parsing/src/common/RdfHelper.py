@@ -12,5 +12,5 @@ def write_rdf(filepath, graph):
 
 def encodeString(s):
     s2 = s.encode('utf8').replace(" ", "_")
-    s2 = urllib2.quote(s2)
+    s2 = urllib2.quote(s2, "/()[]")
     return s2
