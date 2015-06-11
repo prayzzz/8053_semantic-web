@@ -37,7 +37,7 @@ def release_filter(movie):
     for ri in sorted_release_info:
         if "date" not in ri:
             continue
-        if ri["date"] < "2000-01-01T00:00:00":
+        if ri["date"] < "2005-01-01T00:00:00":
             return False
         else:
             return True

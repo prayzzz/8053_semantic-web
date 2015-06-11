@@ -38,6 +38,9 @@ def convert_to_rdf():
     g.bind("dbpprop", NS_DBPPROP)
 
     for c in charts:
+        if c["date"] < "2005-01-01T00:00:00":
+            continue
+
         chart = URIRef(
             BASE_URI % common.encodeString(datetime.strptime(c["date"], "%Y-%m-%dT%H:%M:%S").strftime("%Y-%m-%d")))
         g.add((chart, RDF.type, NS_CHARTS.Chart))

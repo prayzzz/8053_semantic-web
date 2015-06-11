@@ -15,7 +15,7 @@ namespace Reasoner
         private const string ReferenceFilmsQuery = @"Queries\01_Reference_Films.rq";
         private const string ReferenceSongsQuery = @"Queries\02a_Reference_Songs.rq";
         private const string ReferenceArtistsQuery = @"Queries\02b_Reference_Artists.rq";
-        private const string ReferenceChartsDeQuery = @"Queries\03a_Reference_ChartDe.rq";
+        private const string ReferenceChartsDe1Query = @"Queries\03_Reference_ChartDe.rq";
 
         private const string TuneFindDbName = "tunefind";
         private const string ImdbDbName = "imdb";
@@ -139,8 +139,8 @@ namespace Reasoner
             Console.WriteLine(DateTime.Now + " Inserting Artists references...");
             movieStore.Query(File.ReadAllText(ReferenceArtistsQuery));
 
-            Console.WriteLine(DateTime.Now + " Inserting Chart references...");
-            movieStore.Query(File.ReadAllText(ReferenceChartsDeQuery));
+            Console.WriteLine(DateTime.Now + " Inserting Chart song references...");
+            movieStore.Query(File.ReadAllText(ReferenceChartsDe1Query));
         }
 
         private static void RemoveObsoleteTriples()

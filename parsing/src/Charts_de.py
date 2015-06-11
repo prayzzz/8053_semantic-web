@@ -19,7 +19,7 @@ LOAD_FROM_WEB = False
 CONVERT_TO_RDF = False
 STARTDATE = "01.01.2000"
 ENDDATE = "31.05.2015"
-LIMIT = 50
+POSITION_LIMIT = 50
 
 BASE_URI = "http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#%s"
 NS_CHARTS = Namespace("http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#")
@@ -39,6 +39,9 @@ def convert_to_rdf():
     g.bind("dbpprop", NS_DBPPROP)
 
     for c in charts:
+        if c["date"] < "2005-01-01T00:00:00":
+            continue
+
         chart = URIRef(
             BASE_URI % common.encodeString(datetime.strptime(c["date"], "%Y-%m-%dT%H:%M:%S").strftime("%Y-%m-%d")))
         g.add((chart, RDF.type, NS_CHARTS.Chart))
@@ -93,7 +96,7 @@ def process_date(current_date):
 
         chart_row = chart_row.find_next_sibling("tr", class_="drill-down-link")
 
-        if pos == str(LIMIT):
+        if pos == str(POSITION_LIMIT):
             break
 
     return chart
@@ -157,8 +160,8 @@ if __name__ == "__main__":
         elif opt == "-r":
             CONVERT_TO_RDF = True
         elif opt in ('-s', '--startdate'):
-            LIMIT = STARTDATE
+            POSITION_LIMIT = STARTDATE
         elif opt in ('-e', '--enddate'):
-            LIMIT = ENDDATE
+            POSITION_LIMIT = ENDDATE
 
     main()
