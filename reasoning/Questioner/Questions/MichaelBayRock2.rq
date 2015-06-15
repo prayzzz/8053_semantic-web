@@ -1,4 +1,4 @@
-SELECT ?movie ?AnzSongs ?RockSongs ?LoveSongs
+SELECT ?movie ?AnzSongs (COALESCE(?rs, 0) as ?RockSongs) (COALESCE(?lv, 0) as ?LoveSongs)
 FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#>
 FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/lastfm#>
 FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#>
@@ -25,8 +25,9 @@ WHERE
         GROUP BY ?tunefindFilm
     }
 
+    OPTIONAL
     {
-        SELECT (COUNT(DISTINCT ?song) as ?RockSongs) ?tunefindFilm
+        SELECT (COUNT(DISTINCT ?song) as ?rs) ?tunefindFilm
         WHERE
         {
             ?tunefindFilm tunefind:contains ?song .
@@ -40,8 +41,9 @@ WHERE
         GROUP BY ?tunefindFilm
     }
 
+    OPTIONAL
     {
-        SELECT (COUNT(DISTINCT ?song) as ?LoveSongs) ?tunefindFilm
+        SELECT (COUNT(DISTINCT ?song) as ?lv) ?tunefindFilm
         WHERE
         {
             ?tunefindFilm tunefind:contains ?song .
