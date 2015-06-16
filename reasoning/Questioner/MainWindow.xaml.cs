@@ -126,6 +126,12 @@ namespace Questioner
                     var results = resultLine[a];
                     var d = string.Empty;
 
+                    if (results == null)
+                    {
+                        ar[a] = d;
+                        continue;
+                    }
+
                     if (results.NodeType == NodeType.Literal)
                     {
                         d = ((LiteralNode) results).Value;
