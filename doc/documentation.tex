@@ -1,0 +1,117 @@
+\documentclass[parskip]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage[round]{natbib}
+\usepackage{color} % used for comments
+\usepackage{listings}
+\usepackage{url}
+\lstset {
+  language=xml,
+  basicstyle={\footnotesize\ttfamily},
+  numbers=none,
+  aboveskip=5mm,
+  belowskip=5mm,
+  showstringspaces=false,
+  columns=flexible,
+  keywordstyle={\bfseries\color{Blue}},
+  commentstyle={\color{Red}\textit},
+  stringstyle=\color{Magenta},
+  frame=single,
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=4,
+  morekeywords={rdf,rdfs,owl}  % <-- adding custom keywords
+}
+
+\begin{document}
+\subject{Projektdokumentation im Modul Semantic Web}
+\title{Verbreitung von Musik-Titeln nach deren Verwendung in einem Kinofilm}
+\author{Patrick Bachmann}
+\date{\today}
+
+\maketitle
+
+
+\paragraph{Recherchefragestellung: }
+Welche Musik-Titel sind nach der Verwendung in einem Kinofilm in den Top 10 der Charts aufgetaucht?
+
+
+\section{Inhaltliche Interpretation der Fragestellung}
+
+Die Beantwortung dieser Fragestellung lässt bezieht sich im Kontext der Geschichtswissenschaften auf die Forschung im Bereich der wissenschaftliche Zusammenarbeit während der letzten 10 Jahre des kalten Krieges\footnote{Konfrontation zwischen Ost- und Westblock zwischen den Jahren 1947 und 1989}. Die Fragestellung ordnet sich in das Feld der prospographischen Forschung, der Forschung über eine große Gruppe von Individuen in der Geschichte, ein.
+
+\textcolor{blue}{\textbf{Anmerkung:} Es ist wichtig, dass Sie zu allen unten aufgeführten Punkte nachvoll\-ziehbar Ihre Ergebnisse bzw. die von Ihnen durchgeführten Aktivitäten dokumentieren. Die Länge der Dokumentation ist abhängig von der Anzahl und den Besonderheiten der einzelnen Datenquellen. Die Seitenzahl ist auf 12 Seiten begrenzt. Sollten Sie zu keinem Ergebnis Ihrer Recherche gekommen sein, ist eine Darstellung der Probleme und möglicher Alternativen erforderlich.}
+
+\section{Relevante Datenquellen}
+
+An dieser Stell erfolgt eine Auflistung aller relevanten Datenquellen und deren Beschreibung.
+
+\subsection{Professorenkatalog der Universität Leipzig}
+
+Die Datenbank des Professorenkatalogs ist als Linked Data Endpunkt im Web realisiert. Sie erfasst derzeit ca. 2000 Professoren, welche an der Universität Leipzig seit dem Gründungsjahr 1409 lehrten \cite{riechert_knowledge_2010}.
+
+\begin{tabular}{l|p{9cm}}
+	Link & \url{http://catalogus-professorum.org/} \\
+ 	Datenformat & RDF, OWL \\
+ 	Schnittstelle & SPARQL, Linked Data, Dump, Rest-API \\
+ 	Lizenz & CC-SA \\
+ 	Open Data & $\star\star\star\star\star$ \\
+\end{tabular}
+
+\subsection{Bibliothekskatalog der Deutsch Nationalbibliothek}
+
+Die Deutsche Nationalbibliothek (DNB) sammelt alle deutschen Publikationen seit dem Jahr 1913. Darüber hinaus bietet sie umfangreiche Dienstleistungen für Bibliotheken und Wissenschaftler an. Mittels einer durch die DNB vergebenen Normdatensatz (GND)\footnote{Gemeinsame Normdatei} lassen sich Werke, Personen oder Körperschaften identifizieren. Diese Identifizierung ermöglicht es Personen unterschiedlicher Quellen zu verlinken.
+
+\begin{tabular}{l|p{9cm}}
+	Link & \url{https://portal.dnb.de/} \\
+ 	Datenformat & RDF \\
+ 	Schnittstelle & Linked Data, Dump, Rest-API \\
+ 	Lizenz & CC-SA \\
+ 	Open Data & $\star\star\star\star$ \\
+\end{tabular}
+
+\textcolor{blue}{\textbf{Es handelt sich hier um ein Muster, das Dokument ist daher unvollständig...}}
+
+\section{Extraktion relevanter Daten und import in einen Triplestore }
+
+Die Extraktion der Daten erfolgt über die verschiedenen SPARQL-Endpunkte.
+
+\subsection{Extraktion Professorenkatalog}
+
+\subsection{Extraktion GND}
+
+
+\textcolor{blue}{\textbf{Es handelt sich hier um ein Muster, das Dokument ist daher unvollständig...}}
+
+\section{Verlinkung von Ressourcen}
+
+Die Verlinkung erfolgt über die GND. dabei werden im Triple-Store \verb+owl:sameAs+ Triple\footnote{OWL Web Ontology Language
+Reference owl:sameAs: \url{http://www.w3.org/TR/owl-ref/#sameAs-def}} hinzugefügt. Die Listing \ref{list:sameAs} zeit dies an einem Beispiel:
+
+\begin{lstlisting}[caption={Beispiel für die Verwendung von owl:sameAS}, label={list:sameAs}]
+http://catalogs-professorum.org/lipsiensis/Schuecking_144 owl:sameAs http://d-nb.info/gnd/117124931.
+\end{lstlisting}
+
+
+\textcolor{blue}{\textbf{Es handelt sich hier um ein Muster, das Dokument ist daher unvollständig...}}
+
+\section{Anfrage an die Forschungswissensbasis}
+
+\subsection{SPARQL-Anfrage}
+
+\subsection{Ergebnis der Anfrage}
+
+
+\textcolor{blue}{\textbf{Es handelt sich hier um ein Muster, das Dokument ist daher unvollständig...}}
+
+
+\section{Interpretation und Zusammenfassung}
+
+\textcolor{blue}{\textbf{Es handelt sich hier um ein Muster, das Dokument ist daher unvollständig...}}
+
+\bibliographystyle{lnig.bst}
+\bibliography{Projektdokumentation}
+
+
+
+\end{document}

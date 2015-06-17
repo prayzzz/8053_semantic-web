@@ -202,3 +202,9 @@ FakesAssemblies/
 *.opt
 /.idea
 /ontologies/Thumbs.db
+/doc/*.aux
+/doc/*.bbl
+/doc/*.blg
+/doc/*.log
+/doc/*.synctex.gz
+/doc/documentation.pdf
