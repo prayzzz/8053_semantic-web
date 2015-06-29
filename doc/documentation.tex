@@ -5,6 +5,8 @@
 \usepackage{color} % used for comments
 \usepackage{listings}
 \usepackage{url}
+\usepackage{graphicx}
+\graphicspath{ {img/} }
 \lstset {
   language=xml,
   basicstyle={\footnotesize\ttfamily},
@@ -13,15 +15,17 @@
   belowskip=5mm,
   showstringspaces=false,
   columns=flexible,
-  keywordstyle={\bfseries\color{Blue}},
-  commentstyle={\color{Red}\textit},
-  stringstyle=\color{Magenta},
+  keywordstyle={\bfseries\color{blue}},
+  commentstyle={\color{red}\textit},
+  stringstyle=\color{magenta},
   frame=single,
   breaklines=true,
   breakatwhitespace=true,
   tabsize=4,
   morekeywords={rdf,rdfs,owl}  % <-- adding custom keywords
 }
+
+\linespread{1.2}
 
 \begin{document}
 \subject{Projektdokumentation im Modul Semantic Web}
@@ -33,55 +37,179 @@
 
 
 \paragraph{Recherchefragestellung: }
-Welche Musik-Titel sind nach der Verwendung in einem Kinofilm in den Top 10 der Charts aufgetaucht?
+Welche Musik-Titel sind nach der Verwendung in einem Kinofilm in den Top 50 der Charts aufgetaucht?
 
 
 \section{Inhaltliche Interpretation der Fragestellung}
 
-Die Beantwortung dieser Fragestellung lässt bezieht sich im Kontext der Geschichtswissenschaften auf die Forschung im Bereich der wissenschaftliche Zusammenarbeit während der letzten 10 Jahre des kalten Krieges\footnote{Konfrontation zwischen Ost- und Westblock zwischen den Jahren 1947 und 1989}. Die Fragestellung ordnet sich in das Feld der prospographischen Forschung, der Forschung über eine große Gruppe von Individuen in der Geschichte, ein.
+Die Verwendung von Musik in Filmen ist ein gängiges Mittel um den gezeigten Bildern mehr Ausdruck zu verleihen und die Stimmung hervorzuheben. Neben der klassischen Filmmusik, welche individuell für den Film angefertigt wird, werden auch häufig kommerzielle Titel von Künstlern verschiedenster Stilrichtungen und Bekanntheitsgrade verwendet.
 
-\textcolor{blue}{\textbf{Anmerkung:} Es ist wichtig, dass Sie zu allen unten aufgeführten Punkte nachvoll\-ziehbar Ihre Ergebnisse bzw. die von Ihnen durchgeführten Aktivitäten dokumentieren. Die Länge der Dokumentation ist abhängig von der Anzahl und den Besonderheiten der einzelnen Datenquellen. Die Seitenzahl ist auf 12 Seiten begrenzt. Sollten Sie zu keinem Ergebnis Ihrer Recherche gekommen sein, ist eine Darstellung der Probleme und möglicher Alternativen erforderlich.}
+Die Fragestellung soll untersuchen, welche Musik-Titel nach der Verwendung in einem Kinofilm populär wurden bzw. erneut Popularität erreichten.
+
 
 \section{Relevante Datenquellen}
 
 An dieser Stell erfolgt eine Auflistung aller relevanten Datenquellen und deren Beschreibung.
 
-\subsection{Professorenkatalog der Universität Leipzig}
+\subsection{Tunefind}
+\label{subsec:tunefind}
 
-Die Datenbank des Professorenkatalogs ist als Linked Data Endpunkt im Web realisiert. Sie erfasst derzeit ca. 2000 Professoren, welche an der Universität Leipzig seit dem Gründungsjahr 1409 lehrten \cite{riechert_knowledge_2010}.
-
-\begin{tabular}{l|p{9cm}}
-	Link & \url{http://catalogus-professorum.org/} \\
- 	Datenformat & RDF, OWL \\
- 	Schnittstelle & SPARQL, Linked Data, Dump, Rest-API \\
- 	Lizenz & CC-SA \\
- 	Open Data & $\star\star\star\star\star$ \\
-\end{tabular}
-
-\subsection{Bibliothekskatalog der Deutsch Nationalbibliothek}
-
-Die Deutsche Nationalbibliothek (DNB) sammelt alle deutschen Publikationen seit dem Jahr 1913. Darüber hinaus bietet sie umfangreiche Dienstleistungen für Bibliotheken und Wissenschaftler an. Mittels einer durch die DNB vergebenen Normdatensatz (GND)\footnote{Gemeinsame Normdatei} lassen sich Werke, Personen oder Körperschaften identifizieren. Diese Identifizierung ermöglicht es Personen unterschiedlicher Quellen zu verlinken.
+In der Datenbank von Tunefind sind ca. 500 Filme und viele Serien mit den in ihnen verwendeten Musik-Titel gespeichert. Die Datenbank ist nach einer Registrierung über eine REST-Api zu erreichen.
 
 \begin{tabular}{l|p{9cm}}
-	Link & \url{https://portal.dnb.de/} \\
- 	Datenformat & RDF \\
- 	Schnittstelle & Linked Data, Dump, Rest-API \\
- 	Lizenz & CC-SA \\
+	Link & \url{http://www.tunefind.com/} \\
+ 	Datenformat & JSON \\
+ 	Schnittstelle & REST-Api \\
+ 	Lizenz & siehe \url{http://www.tunefind.com/api} \\
  	Open Data & $\star\star\star\star$ \\
 \end{tabular}
 
-\textcolor{blue}{\textbf{Es handelt sich hier um ein Muster, das Dokument ist daher unvollständig...}}
+\subsection{OMDb - The Open Movie Database}
+
+Die Open Movie Database ist eine Web-Service, welcher eine Auswahl an Daten der IMDB über eine API zur Verfügung stellt. Es ist möglich einen Film über seinen  Titel oder seine IMDb ID zu finden. Die Suche über den Titel funktioniert dabei wie eine typische Suchfunktion und liefert auch bei verschiedenen Schreibweisen des Titels zuverlässig Ergebnisse.
+
+Diese Datenquelle wird genutzt um den Filmtitel aus \ref{subsec:tunefind} die ID der IMDB zuzuordnen.
+
+\begin{tabular}{l|p{9cm}}
+    Link & \url{http://www.omdbapi.com/} \\
+    Datenformat & JSON, XML \\
+    Schnittstelle & REST-API \\
+    Lizenz & unbekannt \\
+    Open Data & $\star\star\star$ \\
+\end{tabular}
+
+\subsection{IMDb}
+
+Die Internet Movie Database ist die größte Datenbank für Filme und Serien. Sie enthält eine Vielzahl von Informationen wie z.B. Regisseur, Schauspieler und die Veröffent--lichungsdaten getrennt in Ländern.
+
+\begin{tabular}{l|p{9cm}}
+	Link & \url{http://www.imdb.com/} \\
+ 	Datenformat & HTML \\
+ 	Schnittstelle & HTTP \\
+ 	Lizenz & unbekannt \\
+ 	Open Data & $\star\star$ \\
+\end{tabular}
+
+\subsection{Offizielle Charts}
+
+Die Offiziellen Charts werden von GfK zur Verfügung gestellt. Seit dem 02.01.1978 werden hier wöchentlich die Verkaufszahlen von Musik in Deutschland mit einem Ranking von 1 bis 100 bewertet. Dabei gilt es verschiedene Unterteilungen wie z.B. Single, Album und Compilation.
+
+\begin{tabular}{l|p{9cm}}
+    Link & \url{https://www.offiziellecharts.de} \\
+    Datenformat & HTML \\
+    Schnittstelle & HTTP \\
+    Lizenz & unbekannt \\
+    Open Data & $\star$ \\
+\end{tabular}
 
 \section{Extraktion relevanter Daten und import in einen Triplestore }
 
-Die Extraktion der Daten erfolgt über die verschiedenen SPARQL-Endpunkte.
-
-\subsection{Extraktion Professorenkatalog}
-
-\subsection{Extraktion GND}
+Die Extraktion der Daten wurde bei allen Datenquellen über Python-Skripte realisiert. Für jede Datenquelle wurde ein Skript mit zwei Phasen erstellt. Die \texttt{LoadFromWeb}-Phase lädt die Daten von der Datenquelle herunter und speichert sie als Textdatei mit JSON-Format ab. Die \texttt{ConvertToRdf}-Phase nimmt die abgespeicherten Daten und wandelt diese in Tripel um, welche mit der Turtle-Format abgespeichert werden. Die Phasen können kombiniert oder einzeln ausgeführt werden. Dafür muss dem Skript das Argument \texttt{-l} für die \texttt{LoadFromWeb}-Phase und \texttt{-r} für die \texttt{ConvertToRdf}-Phase mitgegeben werden. Zu beachten ist dabei, dass die \texttt{ConverToRdf}-Phase Daten benötigt. Es muss also eine Textdatei im JSON-Format vorhanden sein.
+Die erzeugten Dateien werden im Ordner \texttt{data/} abgelegt. Die Dateinamen sind im Kopfbereich des jeweiligen Skriptes festgeschrieben.
 
 
-\textcolor{blue}{\textbf{Es handelt sich hier um ein Muster, das Dokument ist daher unvollständig...}}
+\subsection{Verwendete Bibliotheken}
+
+\paragraph{HTML Parsen}
+Für das parsen von HTML-Webseiten wird die Bibliothek \texttt{beauti}--\texttt{fulsoup4  (v4.3.2)} verwendet. Sie ermöglicht ein einfaches arbeiten auf dem DOM-Baum.
+
+\paragraph{RDF}
+Für das Erstellen der Tripel sowie die Speicherung im Turtle-Format wird \texttt{rdflib (v4.2.0)} verwendet. 
+
+\subsection{Extraktion Tunefind}
+
+Tunefind stellt eine API bereit, welche die Daten der Webseite im JSON- oder XML-Format abrufbar macht. Für die Benutzung der API war eine Registrierung erforderlich. Anschließend konnte ein API Benutzernamen und ein API Passwort angefordert werden.
+Um den Endpunkt von Tunefind erfolgreich anzusprechen, mussten einige Besonderheiten bzgl. des Headers der Anfrage beachtet werden. Es wurde ein Header in folgender Form benutzt:
+
+\begin{lstlisting}[caption={HTTP Request Header}, label={list:httpHeader}]
+accept: "text/html, application/json"
+accept-encoding: "gzip, deflate"
+authorization: "Basic %login%"
+user-agent: "%appName%;%email%"
+\end{lstlisting}
+
+Die \texttt{accept}-Eigenschaft gibt an, in welchem Format die Antwort erwartet wird. Da JSON sich sehr gut mit Python verarbeiten lässt, wurde dieses Format gewählt.
+
+Die \texttt{accept-encoding}-Eigenschaft gibt an, dass die Daten gzip komprimiert erwartet werden. Die \texttt{authorization}-Eigenschaft gibt die API-Login Daten für die HTTP-Basic-Authentication an.
+
+Die Variable \texttt{\%login\%} wird mit dem base64-codierten Login-String bestehend aus API Benutzernamen und API Passwort ersetzt.
+
+Die \texttt{user-agent}-Eigenschaft gibt an, welcher Anwendung die Anfrage abschickt. Der Endpunkt von Tunefind lehnt jede Anfrage ab, welche diese Eigenschaft nicht mitschickt. Da es zum guten Ton gehört, wurde neben dem Anwendungsnamen auch eine E-Mail Adresse für die Kontaktaufnahme angegeben. 
+
+Weiterhin ist der Endpunkt auf eine Anfrage pro Sekunde limitiert.
+Die \texttt{LoadToRdf}-Phase und somit die Durchführung der Datenakquise beginnt mit einer Anfrage an:
+
+\texttt{https://www.tunefind.com/api/v1/movie}
+
+Das Ergebnis ist eine Liste mit allen in der Datenbank vorhandenen Filmen. Über die Id können nun die Details zu jedem Film abgerufen werden. Dies geschieht mit Anfragen an:
+
+\texttt{https://www.tunefind.com/api/v1/movie/<movie-id>}
+
+Diese Details enthalten unter anderem die Musik-Titel, welche zu dem angegeben Film in der Datenbank hinterlegt sind.
+Es wird eine Liste mit allen verfügbaren Filmen und ihren Musik-Titeln erstellt. Das Ergebnis wird in folgendem JSON-Format abgespeichert:
+
+\begin{lstlisting}[caption={Tunefind JSON-Format}, label={list:tunefindJson}]
+[  
+    {  
+        "soundtrack":[  
+            {
+                "artist":"",
+                "title":""
+            },
+        ...
+        ],
+        "title":""
+    },
+    ...
+]
+\end{lstlisting}
+
+Die \texttt{ConvertToRdf}-Phase lädt die abgespeicherten Daten wieder und konvertiert sie in Tripel. Dazu wird folgendes Schema verwendet:
+
+\includegraphics[scale=0.7]{tunefind}
+
+\subsection{Extraktion OMDb}
+
+Das OMDb Projekt stellt über eine API Daten der IMDb bereit, da diese selbst keinen Endpunkt zur Verfügung stellt. Der Endpunkt der OMDb ist frei benutzbar und erfordert keine Registrierung oder einen API-Schlüssel.
+
+Die Anfragen an die OMDb API bauen auf den Daten von Tunefind auf. Die Datei im JSON-Format, welche bei den Anfragen an Tunefind erstellt wurde, wird von dem Skript für die OMDb eingelesen. Mit den bereits akquirierten Filmtiteln wird nun der Endpunkt der OMDb-Api angefragt:
+
+\texttt{http://www.omdbapi.com/?t=<Filmtitel>\&plot=short\&r=json}
+
+Das Ergebnis sind die wichtigsten Informationen über den Film. Von Interesse ist dabei aber nur die ID der IMDb. Zusammen mit dem Filmtitel wird diese abgespeichert.
+
+\subsection{Extraktion IMDb}
+
+Die IMDb als größte Film- und Fernseh-Datenbank stellt von sich aus keinen Endpunkt zur Verfügung. Die Informationen, welche über die OMDb-Api gewonnen werden können sind nicht ausreichend, weshalb für die Akquirierung der benötigten Daten nun HTML-Seiten geparst werden müssen. Dafür werden die Daten der OMDb eingelesen und mithilfe der IMDb ID die Info-Seiten des Films aufgerufen.
+
+Die Veröffentlichungsdaten für die Filme werden der \texttt{ReleaseInfo}-Seite entnommen:
+
+\texttt{http://www.imdb.com/title/<ID>/releaseinfo}
+
+Weiterhin wurden die Schauspieler und die Regisseure aus der \texttt{Cast}-Übersicht extrahiert:
+
+\texttt{http://www.imdb.com/title/<ID>/fullcredits}
+
+In der Konvertierungs-Phase wurden nun noch zusätzlich einige Einschränkungen hinzugefügt, um die Anzahl der erzeugten Tripel zu verringern (siehe PROBLEME). Es werden nur Filme übernommen, deren frühstes Veröffentlichungsdatum mindestens im Jahr 2005 liegt. Weiteren werden nur die Veröffentlichungsdaten von Deutschland, Großbritannien sowie den Vereinigten Staaten und die ersten zehn Schauspieler konvertiert.
+
+\subsection{Extraktion Charts}
+
+Wie auch die IMDb, stellen die Offizielen Charts keine API zur Verfügung. Weshalb auch hier auf die Daten aus den HTML-Seiten zurückgegriffen werden muss. Im Gegensatz zu der OMDb und der IMDb baut diese Datenquelle nicht auf Daten des jeweiligen Vorgängers auf. Sie ist somit eigenständig benutzbar.
+
+Die Akquirierung der Daten erfolgt vom 01.01.2000 bis zum 31.05.2015. Da die Charts wöchentlich aktualisiert werden, wird folgende URL auch nur im Abstand von sieben Tagen aufgerufen:
+
+\texttt{https://www.offiziellecharts.de/charts/single/for-date-<DATE>}
+
+Für die Variable \texttt{<DATE>} wird das jeweilige Datum in Millisekunden eingesetzt. Von den Hundert Musiktiteln in den wöchentlichen Charts, werden nur die ersten 50 abgespeichert.
+
+Die Konvertierung zu den Tripeln wurde bei diesem Skript nachträglich angepasst, da sich erst nach der Datenakquirierung dafür entschieden wurde, nur Filme ab dem Jahr 2005 zu betrachten. Es werden alle Charts vom 01.01.2005 bis zum 31.05.2015 als Tripel persistiert.
+
+
+\subsection{Import in einen Triplestore}
+Als Triplestore wurde Stardog verwendet. Er zeichnet sich durch eine einfache Handhabung und Konfiguration aus.
+
+Es wurde versucht den Import der Tripel über die Python-Skripte zu realisieren. Jedoch wird für den Aufbau einer Verbindung über die „rdflib“ zu Stardog eine Abhängigkeit benötigt, welche unter Windows nicht auflösbar war. Deshalb wurden die Dateien mit den Tripel manuell über die Web-Oberfläche von Stardog importiert. Für jede Datenquelle zuvor eine eigene Datenbank angelegt.
+
 
 \section{Verlinkung von Ressourcen}
 
