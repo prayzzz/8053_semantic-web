@@ -110,6 +110,9 @@
     <None Include="Questions\ChartPositionAfterMovieRelease.rq">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Questions\ChartPositionWithoutRankBeforeRelease.rq">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Questions\MichaelBaySongsDistribution.rq">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

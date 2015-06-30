@@ -1,7 +1,3 @@
-# Lieder müssen in einem Film vorkommen
-# Die Chartposition der Lieder werden ausgegeben, wenn sie nach dem Release
-# des Filmes (Deutschland) in den Charts waren
-
 SELECT ?movieName ?songName ?pos ?dayDiff ?chartDate
 FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#>
 FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#>
