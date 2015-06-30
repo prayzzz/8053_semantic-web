@@ -110,10 +110,13 @@
     <None Include="Questions\ChartPositionAfterMovieRelease.rq">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Questions\MichaelBayRock.rq">
+    <None Include="Questions\MichaelBaySongsDistribution.rq">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Questions\MichaelBayRock2.rq">
+    <None Include="Questions\MoviesPerDirector.rq">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Questions\ToddPhillipsSongsDistribution.rq">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="settings.json">

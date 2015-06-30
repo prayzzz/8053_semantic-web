@@ -2,7 +2,7 @@
 # Die Chartposition der Lieder werden ausgegeben, wenn sie nach dem Release
 # des Filmes (Deutschland) in den Charts waren
 
-SELECT ?movieName ?songName ?chartDate ?rDate ?pos
+SELECT ?movieName ?songName ?pos ?dayDiff ?chartDate
 FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#>
 FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#>
 FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/lastfm#>
@@ -34,5 +34,11 @@ WHERE
        charts_de:position ?pos.
   
   FILTER (STR(?chartDate) > STR(?rDate))
+  
+  bind(year(?chartDate) - year(?rDate) as ?yearDiff)
+  bind((month(?chartDate) - month(?rDate)) + 12 * ?yearDiff as ?monthDiff)
+  bind((day(?chartDate) - day(?rDate)) + 30 * ?monthDiff as ?dayDiff)
+
+  FILTER (?dayDiff<= 100)
 }
-ORDER BY ?movieName ?songName ?chartDate
+ORDER BY ?movieName ?songName ?dayDiff
