@@ -190,10 +190,10 @@ Die \texttt{ConvertToRdf}-Phase lädt die abgespeicherten Daten wieder und konve
 
 Das OMDb Projekt stellt über eine API Daten der IMDb bereit, da diese selbst keinen Endpunkt zur Verfügung stellt. Der Endpunkt der OMDb ist frei benutzbar und erfordert keine Registrierung oder einen API-Schlüssel.
 
-Die Anfragen an die OMDb API bauen auf den Daten von Tunefind auf. Die Datei im JSON-Format, welche bei den Anfragen an Tunefind erstellt wurde, wird von dem Skript für die OMDb eingelesen. Mit den bereits akquirierten Filmtiteln wird nun der Endpunkt der OMDb-Api angefragt:\\
+Die OMDb wird als Zwischenschritt für die Extraktion der Daten von der IMDb (siehe \ref{subsec:imdb}) genutzt. Die zur Verfügung gestellte API verfügt über eine Möglichkeit zur Volltextsuche nach Filmtiteln. Diese wird genutzt um zu den Filmtiteln von Tunefind die entsprechenden IMDb Datensätze finden. Dazu wird mit den Filmtiteln folgender Endpunkt angesprochen\\
 \texttt{http://www.omdbapi.com/?t=<Filmtitel>\&plot=short\&r=json}
 
-Das Ergebnis sind die wichtigsten Informationen über den Film. Von Interesse ist dabei jedoch nur die ID der IMDb. Zusammen mit dem Filmtitel wird diese im JSON-Format abgespeichert.
+Als Ergebnis werden die wichtigsten Informationen über den angegebenen Film zurückgeliefert. Darunter ist auch die ID des Films in der IMDb. Diese wird zusammen mit dem Filmtitel von Tunefind in folgenden JSON-Format abgespeichert:
 
 \begin{lstlisting}[caption={OMDb JSON-Format}, label={list:omdbJson}]
 [  
@@ -208,6 +208,7 @@ Das Ergebnis sind die wichtigsten Informationen über den Film. Von Interesse is
 Eine Konvertierung in Tripel ist bei dieser Datenquelle nicht nötigt, da sie nur als Zwischenschritt zur Gewinnung der IMDb ID dient.
 
 \subsection{Extraktion IMDb}
+\label{subsec:imdb}
 
 Die IMDb als größte Film- und Fernseh-Datenbank stellt von sich aus keinen Endpunkt zur Verfügung. Die Informationen, welche über die OMDb-Api gewonnen werden können sind nicht ausreichend, weshalb für die Akquirierung der benötigten Daten nun HTML-Seiten geparst werden müssen. Dafür werden die Daten der OMDb eingelesen und mithilfe der IMDb ID die Info-Seiten des Films aufgerufen.
 
