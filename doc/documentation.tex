@@ -25,7 +25,7 @@
   morekeywords={rdf,rdfs,owl}  % <-- adding custom keywords
 }
 
-\linespread{1.2}
+% \linespread{1.2}
 
 \begin{document}
 \subject{Projektdokumentation im Modul Semantic Web}
@@ -210,17 +210,46 @@ Eine Konvertierung in Tripel ist bei dieser Datenquelle nicht nötigt, da sie nu
 \subsection{Extraktion IMDb}
 \label{subsec:imdb}
 
-Die IMDb als größte Film- und Fernseh-Datenbank stellt von sich aus keinen Endpunkt zur Verfügung. Die Informationen, welche über die OMDb-Api gewonnen werden können sind nicht ausreichend, weshalb für die Akquirierung der benötigten Daten nun HTML-Seiten geparst werden müssen. Dafür werden die Daten der OMDb eingelesen und mithilfe der IMDb ID die Info-Seiten des Films aufgerufen.
+Die IMDb als größte Film- und Fernseh-Datenbank stellt von sich aus keinen Endpunkt zur Verfügung. Weshalb die benötigten Daten aus den HTML-Seiten extrahiert werden müssen. Mithilfe der ID, welche über die OMDb gewonnen wurde, kann nun für jeden Film die entsprechende Unterseite in der IMDb aufgerufen werden.
 
-Die Veröffentlichungsdaten für die Filme werden der \texttt{ReleaseInfo}-Seite entnommen:\\
+Die Veröffentlichungsdaten werden der \textit{ReleaseInfo}-Seite für den jeweiligen Film entnommen:\\
 \texttt{http://www.imdb.com/title/<ID>/releaseinfo}
 
-Weiterhin wurden die Schauspieler und die Regisseure aus der \texttt{Cast}-Übersicht extrahiert:\\
+Weiterhin werden die Schauspieler und Regisseure aus der \textit{Credit}-Übersicht des Films extrahiert:\\
 \texttt{http://www.imdb.com/title/<ID>/fullcredits}
 
-In der Konvertierungs-Phase wurden nun noch zusätzlich einige Einschränkungen hinzugefügt, um die Anzahl der erzeugten Tripel zu verringern (siehe PROBLEME). Es werden nur Filme übernommen, deren frühstes Veröffentlichungsdatum mindestens im Jahr 2005 liegt. Weiteren werden nur die Veröffentlichungsdaten von Deutschland, Großbritannien sowie den Vereinigten Staaten und die ersten zehn Schauspieler konvertiert.
+Die Speicherung der extrahierten Daten erfolgt erneut im JSON-Format. Für den Filmtitel wird dabei statt dem in der IMDb hinterlegten Titel der Titel von Tunefind benutzt. Dies ermöglicht bei der späteren Verlinkung der Ressourcen ein einfaches Zuordnen der Daten. Die Daten werden wie folgt abgespeichert:
 
+\begin{lstlisting}[caption={IMDb JSON-Format}, label={list:imdbJson}]
+[  
+    {  
+        "directors":[  
+            "",
+            ...
+        ],
+        "cast":[
+            {
+                "name": "",
+                "screen_name": ""
+            }
+            ...,
+        ],
+        "release_info":[
+            {
+                "country": "",
+                "event": "",
+                "date": ""
+            }
+            ...,
+        ],
+        "title": "",
+        "imdbID": ""
+    },
+    ...
+]
+\end{lstlisting}
 
+In der Konvertierungs-Phase wurden nachträglich zusätzlich Einschränkungen hinzugefügt, um die Anzahl der erzeugten Tripel zu verringern (siehe PROBLEME). Es werden nur Filme übernommen, deren frühstes Veröffentlichungsdatum mindestens im Jahr 2005 liegt. Weiterhin werden nur die Veröffentlichungsdaten von Deutschland, Großbritannien sowie den Vereinigten Staaten und die ersten zehn Schauspieler konvertiert. Die Regisseure werden uneingeschränkt übernommen. Die Daten werden in folgendem Schema abgespeichert:
 
 \begin{figure}[htbp]
     \centering
@@ -229,34 +258,131 @@ In der Konvertierungs-Phase wurden nun noch zusätzlich einige Einschränkungen 
 
 \subsection{Extraktion Charts}
 
-Wie auch die IMDb, stellen die Offizielen Charts keine API zur Verfügung. Weshalb auch hier auf die Daten aus den HTML-Seiten zurückgegriffen werden muss. Im Gegensatz zu der OMDb und der IMDb baut diese Datenquelle nicht auf Daten des jeweiligen Vorgängers auf. Sie ist somit eigenständig benutzbar.
+Wie auch die IMDb, stellen die Offiziellen Charts keine API zur Verfügung. Weshalb auch hier auf die Daten aus den HTML-Seiten zurückgegriffen werden muss.
 
-Die Akquirierung der Daten erfolgt vom 01.01.2000 bis zum 31.05.2015. Da die Charts wöchentlich aktualisiert werden, wird folgende URL auch nur im Abstand von sieben Tagen aufgerufen:
-
+Die Akquirierung der Daten erfolgt in einem Zeitraum vom 01.01.2000 bis zum 31.05.2015. Es wird mit einem Intervall von sieben Tagen gearbeitet, da die Charts nur wöchentlich aktualisiert werden. Für den Aufruf der folgenden URL muss das Datum in Millisekunden umgerechnet werden:\\
 \texttt{https://www.offiziellecharts.de/charts/single/for-date-<DATE>}
 
-Für die Variable \texttt{<DATE>} wird das jeweilige Datum in Millisekunden eingesetzt. Von den Hundert Musiktiteln in den wöchentlichen Charts, werden nur die ersten 50 abgespeichert.
+Die Extraktion der Daten wird auf die ersten 50 Chart-Einträge jeder Woche begrenzt. Die Abspeicherung erfolgt in folgendem JSON-Format:
 
-Die Konvertierung zu den Tripeln wurde bei diesem Skript nachträglich angepasst, da sich erst nach der Datenakquirierung dafür entschieden wurde, nur Filme ab dem Jahr 2005 zu betrachten. Es werden alle Charts vom 01.01.2005 bis zum 31.05.2015 als Tripel persistiert.
+\begin{lstlisting}[caption={Offizielle Charts JSON-Format}, label={list:chartsDeJson}]
+[  
+    {
+        "tracks": [
+            {
+                "artist": "",
+                "title": "",
+                "pos": ""
+            }
+            ...,
+        ]
+        "date": ""
+    },
+    ...
+]
+\end{lstlisting}
 
+Wie auch bei der IMDb wurden nachträglich Einschränkungen zur Konvertierungs-Phase hinzugefügt, um die Anzahl der Tripel zu verringern. Entsprechend der Einschränkung bei der IMDb, werden nur Charts ab dem 01.01.2005 konvertiert. Dazu wird folgendes Schema verwendet:
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[scale=0.8]{charts}
+\end{figure}
 
 \subsection{Import in einen Triplestore}
-Als Triplestore wurde Stardog verwendet. Er zeichnet sich durch eine einfache Handhabung und Konfiguration aus.
+Als Triplestore wurde Stardog\footnote{\url{http://www.stardog.com}} verwendet. Er zeichnet sich durch eine einfache Handhabung und Konfiguration aus.
 
-Es wurde versucht den Import der Tripel über die Python-Skripte zu realisieren. Jedoch wird für den Aufbau einer Verbindung über die „rdflib“ zu Stardog eine Abhängigkeit benötigt, welche unter Windows nicht auflösbar war. Deshalb wurden die Dateien mit den Tripel manuell über die Web-Oberfläche von Stardog importiert. Für jede Datenquelle zuvor eine eigene Datenbank angelegt.
-
+Es wurde versucht den Import der Tripel über die Python-Skripte zu realisieren. Jedoch wird für den Aufbau einer Verbindung über die \texttt{rdflib} zu Stardog eine Abhängigkeit benötigt, welche unter Windows nicht auflösbar war. Deshalb wurden die Dateien mit den Tripel manuell über die Web-Oberfläche von Stardog importiert. Für jede Datenquelle zuvor eine eigene Datenbank angelegt.
 
 \section{Verlinkung von Ressourcen}
 
-Die Verlinkung erfolgt über die GND. dabei werden im Triple-Store \verb+owl:sameAs+ Triple\footnote{OWL Web Ontology Language
-Reference owl:sameAs: \url{http://www.w3.org/TR/owl-ref/#sameAs-def}} hinzugefügt. Die Listing \ref{list:sameAs} zeit dies an einem Beispiel:
+Da über die \texttt{rdflib} von Python keine Verbindung zu Stardog hergestellt werden konnte, wurde auf die Programmiersprache C\# zurückgegriffen und die dort verfügbare Bibliothek \texttt{dotnetrdf}. Die Logik für die Verlinkung wurde in dem Programm \texttt{Reasoner} hinterlegt.
 
-\begin{lstlisting}[caption={Beispiel für die Verwendung von owl:sameAS}, label={list:sameAs}]
-http://catalogs-professorum.org/lipsiensis/Schuecking_144 owl:sameAs http://d-nb.info/gnd/117124931.
+Im ersten Schritt der Verlinkung werden die Datenbanken der Datenquellen zusammengeführt. Dazu wurde eine neue Datenbank \texttt{movies} angelegt. In dieser werden die Graphen der einzelnen Datenbanken als benannte Graphen abgespeichert.
+
+Anschließend werden über INSERT-Queries in einem neuen Graphen namens \texttt{references} die Beziehungen zwischen den Daten hinterlegt.
+
+\subsection{Referenzierung Tunefind und IMDb}
+Wie bereits in den Abschnitten zur Extraktion erwähnt, wird der Filmtitel von Tunefind bis zu den Daten der IMDb mitgeführt. Aufbauend darauf wird ein INSERT-Query benutzt, welcher ein String-Matching auf den Filmtitel ausführt um die Daten der IMDb mit den Daten von Tunefind verbindet.
+
+\begin{lstlisting}[caption={Offizielle Charts JSON-Format}, label={list:chartsDeJson}]
+PREFIX [...]
+INSERT {
+    GRAPH <http://imn.htwk-leipzig.de/pbachman/ontologies/references#> { 
+        ?imdbFilm owl:sameAs ?tunefindFilm .
+        ?tunefindFilm owl:sameAs ?imdbFilm . }
+}
+USING <http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#>
+USING <http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#>
+WHERE {
+    ?imdbFilm rdf:type dbpedia-owl:Film ;
+               rdfs:label ?imdbFilmLabel .
+    ?tunefindFilm rdf:type dbpedia-owl:Film ;
+               rdfs:label ?tunefindFilmLabel .
+    
+    FILTER(STRSTARTS(STR(?imdbFilm), "http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#"))
+    FILTER(STRSTARTS(STR(?tunefindFilm), "http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#"))
+    
+    FILTER(lcase(STR(?tunefindFilmLabel)) = lcase(STR(?imdbFilmLabel)))
+}
 \end{lstlisting}
 
+\subsection{Referenzierung Tunefind und Charts}
+Für die Referenzierung der Lieder werden die Eigenschaften Titel und Interpret genutzt. Dies funktioniert jedoch nicht so einfach wie bei den Filmen, da nicht davon ausgegangen werden kann, dass die Schreibweise der beiden Eigenschaften bei beiden Datenquellen identisch ist.
 
-\textcolor{blue}{\textbf{Es handelt sich hier um ein Muster, das Dokument ist daher unvollständig...}}
+Es wurde sich für eine Zuordnung über einen Vergleich der Anfangszeichen beider Eigenschaften entschieden. Das Ziel dieses Vergleiches ist es, eine Zuordnung zu Erzeugen bevor verschiedene Schreibweisen diese verhindern. Eine solche unterschiedliche Schreibweise könnte z.B. die Nutzung eines kaufmännischen Und (\&) anstatt eines englisch Und (and) sein. Weiterhin ist es mit dieser Lösung möglich unterschiedliche Angaben von Zweitkünstlern abzufangen, wie im nachfolgenden Beispiel dargestellt.
+\begin{center}
+    \begin{tabular}{l|l|l}
+        \textbf{Datenquelle} & \textbf{Tunefind} & \textbf{Charts} \\\hline
+        Titel & Hips Don't Lie (feat. Wyclef Jean)  & Hips Don't Lie\\
+        Artist & Shakira & Shakira feat. Wyclef Jean\\
+    \end{tabular}
+\end{center}
+
+Die Anzahl der zu vergleichenden Anfangszeichen wurde experimentell mit 7 bestimmt. Daraus ergab sich folgender Query:
+
+\begin{lstlisting}[caption={Offizielle Charts JSON-Format}, label={list:chartsDeJson}]
+PREFIX [...]
+INSERT {
+    GRAPH <http://imn.htwk-leipzig.de/pbachman/ontologies/references#> { 
+        ?tunefindSong owl:sameAs ?chartSong .
+        ?chartSong owl:sameAs ?tunefindSong .        
+        ?tunefindArtist owl:sameAs ?chartArtist .
+        ?chartArtist owl:sameAs ?tunefindArtist .}
+}
+USING <http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#>
+USING <http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#>
+WHERE {
+    ?tunefindSong a dbpedia-owl:Song ;
+                   dbpedia-owl:artist ?tunefindArtist ;
+                   dbpprop:title ?tunefindSongTitle .
+    ?tunefindArtist a dbpedia-owl:MusicalArtist ;
+                     dbpprop:name ?tunefindArtistName .
+    ?chartSong a dbpedia-owl:Song ;
+                dbpedia-owl:artist ?chartArtist ;
+                dbpprop:title ?chartSongTitle .
+    ?chartArtist a dbpedia-owl:MusicalArtist ;
+                  dbpprop:name ?chartArtistName .
+    
+    FILTER(STRSTARTS(STR(?chartSong), "http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#"))
+    FILTER(STRSTARTS(STR(?tunefindSong), "http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#"))
+    
+    FILTER(lcase(SUBSTR(STR(?tunefindSongTitle), 1, 7)) =
+    lcase(SUBSTR(STR(?chartSongTitle), 1, 7)))
+    
+    FILTER(lcase(SUBSTR(STR(?tunefindArtistName), 1, 7)) =
+    lcase(SUBSTR(STR(?chartArtistName), 1, 7)))
+}
+\end{lstlisting}
+
+Dieser Weg des Vergleiches hat den Nachteil, dass auch falsche Zuordnungen entstehen können, wie folgendes Beispiel zeigt:\\
+\begin{center}
+        \begin{tabular}{l|l|l}
+            \textbf{Datenquelle} & \textbf{Tunefind} & \textbf{Charts} \\\hline
+            Titel & Show Me  & Show Me Love\\
+            Artist & Michael Lington & Michael Mind\\
+        \end{tabular}
+\end{center}
 
 \section{Anfrage an die Forschungswissensbasis}
 
