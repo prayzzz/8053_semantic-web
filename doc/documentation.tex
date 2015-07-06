@@ -6,6 +6,8 @@
 \usepackage{listings}
 \usepackage{url}
 \usepackage{graphicx}
+\usepackage[hidelinks]{hyperref}
+\usepackage{float}
 \graphicspath{ {img/} }
 \lstset {
   language=xml,
@@ -130,9 +132,9 @@ Für das Erstellen der Tripel sowie die Speicherung im Turtle-Format wird \textt
 \subsection{Extraktion Tunefind}
 
 Tunefind stellt eine API bereit, welche die Daten der Webseite im JSON- oder XML-Format abrufbar macht. Für die Benutzung der API war eine Registrierung erforderlich. Anschließend konnte ein API Benutzernamen und ein API Passwort angefordert werden.
-Um den Endpunkt von Tunefind erfolgreich anzusprechen, mussten einige Besonderheiten bzgl. des HTTP-Request-Headers beachtet werden. Es wurde ein Header in folgender Form benutzt:
+Um den Endpunkt von Tunefind erfolgreich anzusprechen, mussten einige Besonderheiten bzgl. des HTTP-Request-Headers beachtet werden. \autoref{lst:httpHeader} zeigt den verwendeten Header.
 
-\begin{lstlisting}[caption={HTTP-Request-Header}, label={list:httpHeader}]
+\begin{lstlisting}[caption={HTTP-Request-Header}, label={lst:httpHeader}]
 accept: "text/html, application/json"
 accept-encoding: "gzip, deflate"
 authorization: "Basic %login%"
@@ -148,8 +150,7 @@ user-agent: "%appName%;%email%"
         Angaber der API-Login Daten für die HTTP-Basic-Authentication.
         Die Variable \texttt{\%login\%} wird mit dem base64-codierten Login-String bestehend aus API Benutzernamen und API Passwort ersetzt.
     \item[user-agent] \hfill \\
-        Gibt an, welche Anwendung die Anfrage abgeschickt hat. Der Endpunkt von Tunefind lehnt jede Anfrage ab, welche diese Eigenschaft nicht mitschickt. Da es zum guten Ton gehört, wurde neben dem Anwendungsnamen auch eine E-Mail Adresse für die Kontaktaufnahme angegeben. 
-
+        Gibt an, welche Anwendung die Anfrage abgeschickt hat. Der Endpunkt von Tunefind lehnt jede Anfrage ab, welche diese Eigenschaft nicht mitschickt. Da es zum guten Ton gehört, wurde neben dem Anwendungsnamen auch eine E-Mail Adresse für die Kontaktaufnahme angegeben.
 \end{description}
 
 Weiterhin ist der Endpunkt auf eine Anfrage pro Sekunde limitiert.
@@ -161,9 +162,9 @@ Das Ergebnis ist eine Liste mit allen in der Datenbank vorhandenen Filmen. Über
 \texttt{https://www.tunefind.com/api/v1/movie/<movie-id>}
 
 Diese Details enthalten unter anderem die Musik-Titel, welche zu dem angegeben Film in der Datenbank hinterlegt sind.
-Es wird eine Liste mit allen verfügbaren Filmen und ihren Musik-Titeln erstellt. Das Ergebnis wird in folgendem JSON-Format abgespeichert:
+Es wird eine Liste mit allen verfügbaren Filmen und ihren Musik-Titeln erstellt. \autoref{lst:tunefindJson} zeigt das JSON-Format, in welchem das Ergebnis abgespeichert wird.
 
-\begin{lstlisting}[caption={Tunefind JSON-Format}, label={list:tunefindJson}]
+\begin{lstlisting}[caption={Tunefind JSON-Format}, label={lst:tunefindJson}]
 [  
     {  
         "soundtrack":[  
@@ -179,11 +180,13 @@ Es wird eine Liste mit allen verfügbaren Filmen und ihren Musik-Titeln erstellt
 ]
 \end{lstlisting}
 
-Die \texttt{ConvertToRdf}-Phase lädt die abgespeicherten Daten wieder und konvertiert sie in Tripel. Dazu wird folgendes Schema verwendet:
+Die \texttt{ConvertToRdf}-Phase lädt die abgespeicherten Daten wieder und konvertiert sie in Tripel. Das dazu verwendete Schema zeigt \autoref{fig:tunefindrdf}.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[scale=0.8]{tunefind}
+    \caption{Tunefind RDF Schema}
+    \label{fig:tunefindrdf}
 \end{figure}
 
 \subsection{Extraktion OMDb}
@@ -193,9 +196,9 @@ Das OMDb Projekt stellt über eine API Daten der IMDb bereit, da diese selbst ke
 Die OMDb wird als Zwischenschritt für die Extraktion der Daten von der IMDb (siehe \ref{subsec:imdb}) genutzt. Die zur Verfügung gestellte API verfügt über eine Möglichkeit zur Volltextsuche nach Filmtiteln. Diese wird genutzt um zu den Filmtiteln von Tunefind die entsprechenden IMDb Datensätze finden. Dazu wird mit den Filmtiteln folgender Endpunkt angesprochen\\
 \texttt{http://www.omdbapi.com/?t=<Filmtitel>\&plot=short\&r=json}
 
-Als Ergebnis werden die wichtigsten Informationen über den angegebenen Film zurückgeliefert. Darunter ist auch die ID des Films in der IMDb. Diese wird zusammen mit dem Filmtitel von Tunefind in folgenden JSON-Format abgespeichert:
+Als Ergebnis werden die wichtigsten Informationen über den angegebenen Film zurückgeliefert. Darunter ist auch die ID des Films in der IMDb. \autoref{lst:omdbJson} zeigt das JSON-Format, in welchem der Filmtitel von Tunefind und die IMDb ID abgespeichert werden.
 
-\begin{lstlisting}[caption={OMDb JSON-Format}, label={list:omdbJson}]
+\begin{lstlisting}[caption={OMDb JSON-Format}, label={lst:omdbJson}]
 [  
     {  
         "title":""
@@ -218,9 +221,9 @@ Die Veröffentlichungsdaten werden der \textit{ReleaseInfo}-Seite für den jewei
 Weiterhin werden die Schauspieler und Regisseure aus der \textit{Credit}-Übersicht des Films extrahiert:\\
 \texttt{http://www.imdb.com/title/<ID>/fullcredits}
 
-Die Speicherung der extrahierten Daten erfolgt erneut im JSON-Format. Für den Filmtitel wird dabei statt dem in der IMDb hinterlegten Titel der Titel von Tunefind benutzt. Dies ermöglicht bei der späteren Verlinkung der Ressourcen ein einfaches Zuordnen der Daten. Die Daten werden wie folgt abgespeichert:
+Die Speicherung der extrahierten Daten erfolgt erneut im JSON-Format. Für den Filmtitel wird dabei statt dem in der IMDb hinterlegten Titel der Titel von Tunefind benutzt. Dies ermöglicht bei der späteren Verlinkung der Ressourcen ein einfaches Zuordnen der Daten. \autoref{lst:imdbJson} zeigt das JSON-Format, in welchem die Daten abgespeichert werden.
 
-\begin{lstlisting}[caption={IMDb JSON-Format}, label={list:imdbJson}]
+\begin{lstlisting}[caption={IMDb JSON-Format}, label={lst:imdbJson}]
 [  
     {  
         "directors":[  
@@ -249,11 +252,13 @@ Die Speicherung der extrahierten Daten erfolgt erneut im JSON-Format. Für den F
 ]
 \end{lstlisting}
 
-In der Konvertierungs-Phase wurden nachträglich zusätzlich Einschränkungen hinzugefügt, um die Anzahl der erzeugten Tripel zu verringern (siehe PROBLEME). Es werden nur Filme übernommen, deren frühstes Veröffentlichungsdatum mindestens im Jahr 2005 liegt. Weiterhin werden nur die Veröffentlichungsdaten von Deutschland, Großbritannien sowie den Vereinigten Staaten und die ersten zehn Schauspieler konvertiert. Die Regisseure werden uneingeschränkt übernommen. Die Daten werden in folgendem Schema abgespeichert:
+In der Konvertierungs-Phase wurden nachträglich zusätzlich Einschränkungen hinzugefügt, um die Anzahl der erzeugten Tripel zu verringern (siehe PROBLEME). Es werden nur Filme übernommen, deren frühstes Veröffentlichungsdatum mindestens im Jahr 2005 liegt. Weiterhin werden nur die Veröffentlichungsdaten von Deutschland, Großbritannien sowie den Vereinigten Staaten und die ersten zehn Schauspieler konvertiert. Die Regisseure werden uneingeschränkt übernommen. Das dazu verwendete Schema zeigt \autoref{fig:imdbrdf}.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[scale=0.8]{imdb}
+    \caption{IMDb RDF Schema}
+    \label{fig:imdbrdf}
 \end{figure}
 
 \subsection{Extraktion Charts}
@@ -263,9 +268,9 @@ Wie auch die IMDb, stellen die Offiziellen Charts keine API zur Verfügung. Wesh
 Die Akquirierung der Daten erfolgt in einem Zeitraum vom 01.01.2000 bis zum 31.05.2015. Es wird mit einem Intervall von sieben Tagen gearbeitet, da die Charts nur wöchentlich aktualisiert werden. Für den Aufruf der folgenden URL muss das Datum in Millisekunden umgerechnet werden:\\
 \texttt{https://www.offiziellecharts.de/charts/single/for-date-<DATE>}
 
-Die Extraktion der Daten wird auf die ersten 50 Chart-Einträge jeder Woche begrenzt. Die Abspeicherung erfolgt in folgendem JSON-Format:
+Die Extraktion der Daten wird auf die ersten 50 Chart-Einträge jeder Woche begrenzt. \autoref{lst:chartsDeJson} zeigt das JSON-Format, in welchem die Daten abgespeichert werden.
 
-\begin{lstlisting}[caption={Offizielle Charts JSON-Format}, label={list:chartsDeJson}]
+\begin{lstlisting}[caption={Offizielle Charts JSON-Format}, label={lst:chartsDeJson}]
 [  
     {
         "tracks": [
@@ -282,21 +287,23 @@ Die Extraktion der Daten wird auf die ersten 50 Chart-Einträge jeder Woche begr
 ]
 \end{lstlisting}
 
-Wie auch bei der IMDb wurden nachträglich Einschränkungen zur Konvertierungs-Phase hinzugefügt, um die Anzahl der Tripel zu verringern. Entsprechend der Einschränkung bei der IMDb, werden nur Charts ab dem 01.01.2005 konvertiert. Dazu wird folgendes Schema verwendet:
+Wie auch bei der IMDb wurden nachträglich Einschränkungen zur Konvertierungs-Phase hinzugefügt, um die Anzahl der Tripel zu verringern. Entsprechend der Einschränkung bei der IMDb, werden nur Charts ab dem 01.01.2005 konvertiert. Das dazu verwendete Schema zeigt \autoref{fig:chartrdf}.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[scale=0.8]{charts}
+    \caption{Charts RDF Schema}
+    \label{fig:chartrdf}
 \end{figure}
 
 \subsection{Import in einen Triplestore}
-Als Triplestore wurde Stardog\footnote{\url{http://www.stardog.com}} verwendet. Er zeichnet sich durch eine einfache Handhabung und Konfiguration aus.
+Als Triplestore wurde Stardog\footnote{\url{http://www.stardog.com}} in der Community Edition verwendet. Er zeichnet sich durch eine einfache Handhabung und Konfiguration aus.
 
 Es wurde versucht den Import der Tripel über die Python-Skripte zu realisieren. Jedoch wird für den Aufbau einer Verbindung über die \texttt{rdflib} zu Stardog eine Abhängigkeit benötigt, welche unter Windows nicht auflösbar war. Deshalb wurden die Dateien mit den Tripel manuell über die Web-Oberfläche von Stardog importiert. Für jede Datenquelle zuvor eine eigene Datenbank angelegt.
 
 \section{Verlinkung von Ressourcen}
 
-Da über die \texttt{rdflib} von Python keine Verbindung zu Stardog hergestellt werden konnte, wurde auf die Programmiersprache C\# zurückgegriffen und die dort verfügbare Bibliothek \texttt{dotnetrdf}. Die Logik für die Verlinkung wurde in dem Programm \texttt{Reasoner} hinterlegt.
+Da über die \texttt{rdflib} von Python keine Verbindung zu Stardog hergestellt werden konnte, wurde auf die Programmiersprache C\# zurückgegriffen und die dort verfügbare Bibliothek \texttt{dotnetrdf}.
 
 Im ersten Schritt der Verlinkung werden die Datenbanken der Datenquellen zusammengeführt. Dazu wurde eine neue Datenbank \texttt{movies} angelegt. In dieser werden die Graphen der einzelnen Datenbanken als benannte Graphen abgespeichert.
 
@@ -305,8 +312,7 @@ Anschließend werden über INSERT-Queries in einem neuen Graphen namens \texttt{
 \subsection{Referenzierung Tunefind und IMDb}
 Wie bereits in den Abschnitten zur Extraktion erwähnt, wird der Filmtitel von Tunefind bis zu den Daten der IMDb mitgeführt. Aufbauend darauf wird ein INSERT-Query benutzt, welcher ein String-Matching auf den Filmtitel ausführt um die Daten der IMDb mit den Daten von Tunefind verbindet.
 
-\begin{lstlisting}[caption={Offizielle Charts JSON-Format}, label={list:chartsDeJson}]
-PREFIX [...]
+\begin{lstlisting}[caption={Offizielle Charts JSON-Format}, label={list:chartsDeJson},float,floatplacement=H]
 INSERT {
     GRAPH <http://imn.htwk-leipzig.de/pbachman/ontologies/references#> { 
         ?imdbFilm owl:sameAs ?tunefindFilm .
@@ -330,10 +336,10 @@ WHERE {
 \subsection{Referenzierung Tunefind und Charts}
 Für die Referenzierung der Lieder werden die Eigenschaften Titel und Interpret genutzt. Dies funktioniert jedoch nicht so einfach wie bei den Filmen, da nicht davon ausgegangen werden kann, dass die Schreibweise der beiden Eigenschaften bei beiden Datenquellen identisch ist.
 
-Es wurde sich für eine Zuordnung über einen Vergleich der Anfangszeichen beider Eigenschaften entschieden. Das Ziel dieses Vergleiches ist es, eine Zuordnung zu Erzeugen bevor verschiedene Schreibweisen diese verhindern. Eine solche unterschiedliche Schreibweise könnte z.B. die Nutzung eines kaufmännischen Und (\&) anstatt eines englisch Und (and) sein. Weiterhin ist es mit dieser Lösung möglich unterschiedliche Angaben von Zweitkünstlern abzufangen, wie im nachfolgenden Beispiel dargestellt.
+Es wurde sich für eine Zuordnung über einen Vergleich der Anfangszeichen beider Eigenschaften entschieden. Das Ziel dieses Vergleiches ist es, eine Zuordnung zu Erzeugen bevor verschiedene Schreibweisen diese verhindern. Eine solche unterschiedliche Schreibweise könnte z.B. die Angabe des Zweitkünstlers sein, wie im nachfolgenden Beispiel dargestellt.
 \begin{center}
     \begin{tabular}{l|l|l}
-        \textbf{Datenquelle} & \textbf{Tunefind} & \textbf{Charts} \\\hline
+         & \textbf{Tunefind} & \textbf{Charts} \\\hline
         Titel & Hips Don't Lie (feat. Wyclef Jean)  & Hips Don't Lie\\
         Artist & Shakira & Shakira feat. Wyclef Jean\\
     \end{tabular}
@@ -342,7 +348,6 @@ Es wurde sich für eine Zuordnung über einen Vergleich der Anfangszeichen beide
 Die Anzahl der zu vergleichenden Anfangszeichen wurde experimentell mit 7 bestimmt. Daraus ergab sich folgender Query:
 
 \begin{lstlisting}[caption={Offizielle Charts JSON-Format}, label={list:chartsDeJson}]
-PREFIX [...]
 INSERT {
     GRAPH <http://imn.htwk-leipzig.de/pbachman/ontologies/references#> { 
         ?tunefindSong owl:sameAs ?chartSong .
@@ -378,11 +383,13 @@ WHERE {
 Dieser Weg des Vergleiches hat den Nachteil, dass auch falsche Zuordnungen entstehen können, wie folgendes Beispiel zeigt:\\
 \begin{center}
         \begin{tabular}{l|l|l}
-            \textbf{Datenquelle} & \textbf{Tunefind} & \textbf{Charts} \\\hline
+             & \textbf{Tunefind} & \textbf{Charts} \\\hline
             Titel & Show Me  & Show Me Love\\
             Artist & Michael Lington & Michael Mind\\
         \end{tabular}
 \end{center}
+
+Die Anzahl solcher falschen Zuordnungen erwies sich nach Stichproben allerdings als gering und wird deshalb in Kauf genommen.
 
 \section{Anfrage an die Forschungswissensbasis}
 
