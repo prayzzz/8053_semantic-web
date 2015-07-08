@@ -9,6 +9,7 @@
 \usepackage[hidelinks]{hyperref}
 \usepackage{float}
 \usepackage{array}
+\usepackage{longtable}
 \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 \newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
@@ -255,7 +256,7 @@ Die Speicherung der extrahierten Daten erfolgt erneut im JSON-Format. Für den F
 ]
 \end{lstlisting}
 
-In der Konvertierungs-Phase wurden nachträglich Einschränkungen hinzugefügt, um die Anzahl der erzeugten Tripel zu verringern (siehe PROBLEME). Es werden nur Filme übernommen, deren frühstes Veröffentlichungsdatum mindestens im Jahr 2005 liegt. Weiterhin werden nur die Veröffentlichungsdaten von Deutschland, Großbritannien sowie den Vereinigten Staaten und die ersten zehn Schauspieler konvertiert. Die Regisseure werden uneingeschränkt übernommen. Das dazu verwendete Schema zeigt \autoref{fig:imdbrdf}.
+In der Konvertierungs-Phase wurden nachträglich Einschränkungen hinzugefügt, um die Anzahl der erzeugten Tripel zu verringern (siehe \ref{subsec:problems}). Es werden nur Filme übernommen, deren frühstes Veröffentlichungsdatum mindestens im Jahr 2005 liegt. Weiterhin werden nur die Veröffentlichungsdaten von Deutschland, Großbritannien sowie den Vereinigten Staaten und die ersten zehn Schauspieler konvertiert. Die Regisseure werden uneingeschränkt übernommen. Das dazu verwendete Schema zeigt \autoref{fig:imdbrdf}.
 
 \begin{figure}[H]
     \centering
@@ -392,6 +393,10 @@ WHERE {
 }
 \end{lstlisting}
 
+\subsection{Probleme}
+\label{subsec:problems}
+
+Bei der Verlinkung der Ressourcen traten erstmals schwerwiegende Probleme auf. Die Daten der drei Quellen erzeugten über 700 000 Tripel, für welche die Bearbeitungszeit der Verlinkungs-Queries im niedrigen zweistelligen  Minuten-Bereich lag. Um die Bearbeitungszeit zu verringern, wurde sich dafür entschieden die Anzahl der Tripel zu reduzieren. Dafür wurden nachträglich Einschränkungen zur Konvertierungsphase hinzugefügt.
 
 \section{Anfrage an die Forschungswissensbasis}
 
@@ -409,7 +414,7 @@ Das Ergebnis der Abfrage ist eine Liste aller Musiktitel, welche bis maximal 100
 
 \captionof{table}{Ergebnisausschnitt}
 \label{tab:result}
-\begin{tabular}{p{0.2\textwidth}|p{0.5\textwidth}|C{0.08\textwidth}|C{0.1\textwidth}}
+\begin{longtable}{p{0.2\textwidth}|p{0.5\textwidth}|C{0.08\textwidth}|C{0.1\textwidth}}
     \textbf{Film} & \textbf{Musiktitel} & \textbf{Tage}\footnotemark & \textbf{Platzierung} \\ \hline
     Fantastic Four & Ben Moody feat. Anastacia - Everything Burns & 9 & 13 \\
     Fantastic Four & Ben Moody feat. Anastacia - Everything Burns & 16 & 20 \\
@@ -427,7 +432,7 @@ Das Ergebnis der Abfrage ist eine Liste aller Musiktitel, welche bis maximal 100
     Step Up 3D & Flo Rida feat. David Guetta - Club Can't Handle Me & 15 & 4 \\
     Step Up 3D & Flo Rida feat. David Guetta - Club Can't Handle Me & 22 & 5 \\
     ... & ... & ... & ... \\
-\end{tabular}
+\end{longtable}
 \footnotetext{Tage nach Veröffentlichung des Films}
 
 \section{Interpretation und Zusammenfassung}
