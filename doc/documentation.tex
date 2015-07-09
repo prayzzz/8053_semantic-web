@@ -10,10 +10,13 @@
 \usepackage{float}
 \usepackage{array}
 \usepackage{longtable}
+
 \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 \newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
 \graphicspath{ {img/} }
+
 \lstset {
   language=xml,
   basicstyle={\footnotesize\ttfamily},
@@ -29,21 +32,22 @@
   breaklines=true,
   breakatwhitespace=true,
   tabsize=4,
-  morekeywords={rdf,rdfs,owl}  % <-- adding custom keywords
+  morekeywords={rdf,rdfs,owl,sql}  % <-- adding custom keywords
 }
-
-% \linespread{1.2}
 
 \begin{document}
 \subject{Projektdokumentation im Modul Semantic Web}
+
 \title{Verbreitung von Musiktiteln nach deren Verwendung in einem Kinofilm}
+
 \author{Patrick Bachmann}
+
 \date{\today}
 
 \maketitle
 
+\paragraph{Recherchefragestellung}
 
-\paragraph{Recherchefragestellung: }
 Welche Musiktitel sind nach der Verwendung in einem Kinofilm in den Top 50 der Charts aufgetaucht?
 
 \section{Inhaltliche Interpretation der Fragestellung}
@@ -124,7 +128,6 @@ Die Offiziellen Charts werden von der GfK zur Verfügung gestellt. Seit dem 02.0
 Die Extraktion der Daten wurde bei allen Datenquellen über Python-Skripte realisiert. Für jede Datenquelle wurde ein Skript mit zwei Phasen erstellt. Die \texttt{LoadFromWeb}-Phase lädt die Daten von der Datenquelle herunter und speichert sie als Textdatei mit JSON-Format ab. Die \texttt{ConvertToRdf}-Phase lädt die abgespeicherten Daten aus der vorher gespeicherten Datei und wandelt diese in Tripel um, welche im Turtle-Format abgespeichert werden. Die Phasen können kombiniert oder einzeln ausgeführt werden. Dafür muss dem Skript das Argument \texttt{-l} für die \texttt{LoadFromWeb}-Phase und \texttt{-r} für die \texttt{ConvertToRdf}-Phase mitgegeben werden.
 
 Die erzeugten Dateien werden im Ordner \texttt{data/} abgelegt. Die Dateinamen sind im Kopfbereich des jeweiligen Skriptes festgeschrieben.
-
 
 \subsection{Verwendete Bibliotheken}
 
@@ -301,6 +304,7 @@ Wie auch bei der IMDb wurden nachträglich Einschränkungen zur Konvertierungs-P
 \end{figure}
 
 \subsection{Import in einen Triplestore}
+
 Als Triplestore wurde Stardog\footnote{\url{http://www.stardog.com}} in der Community Edition verwendet. Er zeichnet sich durch eine einfache Handhabung und Konfiguration aus.
 
 Es wurde versucht den Import der Tripel über die Python-Skripte zu realisieren. Jedoch benötigt \texttt{rdflib} für den Verbindungsaufbau zu Stardog eine Abhängigkeit, welche unter Windows nicht aufgelöst werden konnte. Als Alternative wurden die Dateien mit den Tripeln manuell über die Web-Oberfläche von Stardog importiert. Für jede Datenquelle wurde zuvor eine eigene Datenbank angelegt.
@@ -315,6 +319,7 @@ Anschließend wurden über INSERT-Queries in einem neuen Graphen namens \texttt{
 
 \subsection{Referenzierung Tunefind und IMDb}
 \label{subsec:refTunefindImdb}
+
 Wie bereits in den Abschnitten zur Extraktion erwähnt, wurde der Filmtitel von Tunefind bis zu den Daten der IMDb mitgeführt. Aufbauend darauf wurde ein INSERT-Query (siehe \autoref{lst:refTunefindImdb}) benutzt, welcher ein String-Matching auf den Filmtitel ausführt um die Daten der IMDb mit den Daten von Tunefind verbindet. 
 
 \begin{lstlisting}[caption={SPARQL-Query zur Referenzierung von Tunefind und IMDb}, label={lst:refTunefindImdb}]
@@ -339,6 +344,7 @@ WHERE {
 \end{lstlisting}
 
 \subsection{Referenzierung Tunefind und Charts}
+
 Für die Referenzierung der Musiktitel wurden die Eigenschaften Name und Interpret genutzt. Dies funktioniert jedoch nicht so einfach wie bei den Filmtitel (siehe \ref{subsec:refTunefindImdb}), da nicht davon ausgegangen werden kann, dass die Schreibweise der Eigenschaften bei beiden Datenquellen identisch ist.
 
 Es wurde sich für eine Zuordnung über einen Vergleich der Anfangszeichen beider Eigenschaften entschieden. Das Ziel dieses Vergleiches ist es, eine Zuordnung zu Erzeugen bevor verschiedene Schreibweisen diese verhindern. Eine solche unterschiedliche Schreibweise könnte z.B. die Angabe des Zweitkünstlers sein, wie im nachfolgenden Beispiel dargestellt.
@@ -440,7 +446,103 @@ Das Ergebnis der Abfrage ist eine Liste aller Musiktitel, welche bis maximal 100
 
 Die Ergebnisse der Anfrage an die Wissensbasis zeigen, dass es Musiktitel gibt, welche von der Veröffentlichung eines Films profitieren. Da die Wissensbasis jedoch begrenzt ist und mit den Veröffentlichungsdaten von Filmen nur einen von vielen Einflüssen auf die Verkaufszahlen von Musiktitel widerspiegelt, dürfen die Ergebnisse nicht als repräsentativ angesehen werden.
 
+Aufgrund der geringen Aussagekraft der Recherchefragestellung, wurde eine zweite Fragestellung zu Beantwortung herangezogen:\\
+\textit{Verwendet der Regisseur Michael Bay mehr Rocksongs als andere Titel in seinen Filmen?}
 
+Um diese Fragestellung zu beantworten, mussten die Musiktitel, welche von Tunefind gewonnen wurden, in Genre eingeteilt werden. Um dies zu erreichen, wurde Last.FM als Datenquelle hinzugezogen. Eine kurze Erläuterung zu der zusätzlichen Datenquelle findet sich in \autoref{sec:appendix}.
+
+
+\section{Anhang}
+\label{sec:appendix}
+
+\subsection{Datenquelle Last.FM}
+
+Last.FM ist ein soziales Netzwerk zum Entdecken von Musik. Der Musikkatalog von Last.FM umfasst mehr als 10 Millionen Songs.
+
+\begin{tabular}{l|p{9cm}}
+    Link & \url{http://www.last.fm/} \\
+    Datenformat & JSON \\
+    Schnittstelle & REST-API \\
+    Lizenz & individuell \href{http://www.last.fm/api/tos}{http://www.last.fm/api/tos} \\
+    Open Data & $\star\star\star$ \\
+\end{tabular}
+
+\subsection{Extraktion Last.FM}
+
+Die Daten von Last.FM sind über eine API erreichbar. Um diese zu benutzen ist eine Registrierung und die Anforderung eines API Schlüssels erforderlich.
+
+Für die Verbindung zur API wurde die Bibliothek \texttt{pylast (1.2.1)}\footnote{\href{https://github.com/pylast/pylast}{https://github.com/pylast/pylast}} eingesetzt. Für jeden Musiktitel, welcher von Tunefind gewonnen wurde, werden in der \texttt{LoadFromWeb}-Phase die ersten fünf \textit{TopTags} abgerufen. \autoref{lst:jsonLastfm} zeigt das JSON-Format in welchem die Daten abgespeichert werden.
+
+\begin{lstlisting}[caption={JSON-Format Last.FM}, label={lst:jsonLastfm}]
+[
+    {
+        "title": "",
+        "tags": ["", ... ],
+        "artist": "",
+    },
+    ...
+]
+\end{lstlisting}
+
+Die Konvertierung der Daten in Tripel erfolgt ohne weitere Einschränkungen. Das dazu verwendete Schema zeigt \autoref{fig:lastfmrdf}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.8]{lastfm}
+    \caption{Last.FM RDF Schema}
+    \label{fig:lastfmrdf}
+\end{figure}
+
+\subsection{Abfrage und Ergebnisse}
+
+\begin{lstlisting}[caption={SPARQL-Anfrage zum Beantworten der alternativen Recherchefragestellung}, label={lst:questionSparql2}]
+SELECT ?movie (COALESCE(?taggedS, 0) as ?AnzahlSongs) (COALESCE(?rockS, 0) as ?RockSongs)
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/lastfm#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/references#>
+WHERE {
+    {
+        ?imdbmovie a dbpedia-owl:Film ;
+        dbpprop:title ?movie ;
+        dbpedia-owl:director imdb:Michael_Bay ;
+        owl:sameAs ?tunefindFilm .
+    }    
+    OPTIONAL {
+        SELECT (COUNT(DISTINCT ?song) as ?rockS) ?tunefindFilm
+        WHERE {
+            ?tunefindFilm tunefind:contains ?song .
+            ?song rdfs:label ?s ;
+            owl:sameAs ?lastFmSong .            
+            ?lastFmSong lastfm:tagged ?tag .            
+            FILTER (CONTAINS(lcase(?tag), "rock"))
+        }
+        GROUP BY ?tunefindFilm
+    }    
+    OPTIONAL {
+        SELECT (COUNT(DISTINCT ?song) as ?taggedS) ?tunefindFilm
+        WHERE {
+            ?tunefindFilm tunefind:contains ?song .
+            ?song rdfs:label ?s ;
+            owl:sameAs ?lastFmSong .            
+            ?lastFmSong lastfm:tagged ?tag .            
+        }
+        GROUP BY ?tunefindFilm
+    }
+}
+\end{lstlisting}
+
+\captionof{table}{Ergebnisausschnitt}
+\label{tab:resultLastFm}
+\begin{tabular}{p{0.45\textwidth}|C{0.18\textwidth}|C{0.25\textwidth}}
+    \textbf{Film} & \textbf{Anz. Songs} & \textbf{Anz. Rocksongs} \\ \hline
+    Transformers & 9 & 7 \\
+    Transformers: Age of Extinction & 0 & 0 \\
+    Transformers: Dark of the Moon & 10 & 9 \\
+    Transformers: Revenge of the Fallen & 11 & 8\\
+\end{tabular}
+
+\pagebreak
 \begin{lstlisting}[caption={SPARQL-Anfrage zum Beantworten der Recherchefragestellung}, label={lst:questionSparql}]
 SELECT ?movieName ?songName ?chartPosition ?daysAfterMovieRelease
 FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#>
