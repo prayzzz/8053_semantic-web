@@ -417,10 +417,11 @@ Die verwendete SPARQL-Abfrage ist in \autoref{lst:questionSparql} zu sehen. Zuer
 
 Das Ergebnis der Abfrage ist eine Liste aller Musiktitel, welche bis maximal 100 Tage nach der Veröffentlichung des Films in den TOP 50 der Charts aufgeführt waren. Titel welche bereits vor der Veröffentlichung des Films in dem sie vorkamen in den Charts waren, werden nicht mit aufgeführt.
 
-\autoref{tab:result} zeigt einen Ausschnitt der Ergebnisse. Insgesamt umfasst das Anfrage-Ergebnis 137 Zeilen mit 23 verschiedenen Musiktiteln.
+\autoref{tab:result} zeigt einen Ausschnitt\footnote{Das vollständige Ergebnisse liegt als *.csv und *.xslx bei} der Ergebnisse. Insgesamt umfasst das Anfrage-Ergebnis 137 Zeilen mit 23 verschiedenen Musiktiteln.
 
 \captionof{table}{Ergebnisausschnitt}
 \label{tab:result}
+\begin{small}
 \begin{longtable}{p{0.2\textwidth}|p{0.5\textwidth}|C{0.08\textwidth}|C{0.1\textwidth}}
     \textbf{Film} & \textbf{Musiktitel} & \textbf{Tage}\footnotemark & \textbf{Platzierung} \\ \hline
     Fantastic Four & Ben Moody feat. Anastacia - Everything Burns & 9 & 13 \\
@@ -441,7 +442,8 @@ Das Ergebnis der Abfrage ist eine Liste aller Musiktitel, welche bis maximal 100
     ... & ... & ... & ... \\
 \end{longtable}
 \footnotetext{Tage nach Veröffentlichung des Films}
-
+\end{small}
+    
 \section{Interpretation und Zusammenfassung}
 
 Die Ergebnisse der Anfrage an die Wissensbasis zeigen, dass es Musiktitel gibt, welche von der Veröffentlichung eines Films profitieren. Da die Wissensbasis jedoch begrenzt ist und mit den Veröffentlichungsdaten von Filmen nur einen von vielen Einflüssen auf die Verkaufszahlen von Musiktitel widerspiegelt, dürfen die Ergebnisse nicht als repräsentativ angesehen werden.
@@ -451,7 +453,7 @@ Aufgrund der geringen Aussagekraft der Recherchefragestellung, wurde eine zweite
 
 Um diese Fragestellung zu beantworten, mussten die Musiktitel, welche von Tunefind gewonnen wurden, in Genre eingeteilt werden. Um dies zu erreichen, wurde Last.FM als Datenquelle hinzugezogen. Eine kurze Erläuterung zu der zusätzlichen Datenquelle findet sich in \autoref{sec:appendix}.
 
-
+\pagebreak
 \section{Anhang}
 \label{sec:appendix}
 
@@ -493,57 +495,28 @@ Die Konvertierung der Daten in Tripel erfolgt ohne weitere Einschränkungen. Das
     \label{fig:lastfmrdf}
 \end{figure}
 
+\subsection{Referenzierung Tunefind und Last.FM}
+
+Die Referenzierung der Musiktitel erweist sich als einfach, da der Titel und der Künstlername von Tunefind übernommen wurden. Die Referenzierung wurde deshalb über eine einfaches String-Matching realisiert.
+
 \subsection{Abfrage und Ergebnisse}
 
-\begin{lstlisting}[caption={SPARQL-Anfrage zum Beantworten der alternativen Recherchefragestellung}, label={lst:questionSparql2}]
-SELECT ?movie (COALESCE(?taggedS, 0) as ?AnzahlSongs) (COALESCE(?rockS, 0) as ?RockSongs)
-FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#>
-FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/lastfm#>
-FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#>
-FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/references#>
-WHERE {
-    {
-        ?imdbmovie a dbpedia-owl:Film ;
-        dbpprop:title ?movie ;
-        dbpedia-owl:director imdb:Michael_Bay ;
-        owl:sameAs ?tunefindFilm .
-    }    
-    OPTIONAL {
-        SELECT (COUNT(DISTINCT ?song) as ?rockS) ?tunefindFilm
-        WHERE {
-            ?tunefindFilm tunefind:contains ?song .
-            ?song rdfs:label ?s ;
-            owl:sameAs ?lastFmSong .            
-            ?lastFmSong lastfm:tagged ?tag .            
-            FILTER (CONTAINS(lcase(?tag), "rock"))
-        }
-        GROUP BY ?tunefindFilm
-    }    
-    OPTIONAL {
-        SELECT (COUNT(DISTINCT ?song) as ?taggedS) ?tunefindFilm
-        WHERE {
-            ?tunefindFilm tunefind:contains ?song .
-            ?song rdfs:label ?s ;
-            owl:sameAs ?lastFmSong .            
-            ?lastFmSong lastfm:tagged ?tag .            
-        }
-        GROUP BY ?tunefindFilm
-    }
-}
-\end{lstlisting}
+Die verwendete SPARQL-Abfrage für die alternative Recherchefragestellung ist in \autoref{lst:questionSparql2} zu sehen. Zuerst werden alle Filme vom Regisseur Michael Bay gesucht, anschließend wird die Anzahl der Musiktitel und der Rocktitel für jeden Film gezählt. Wenn ein Film keine Songs oder Rocksongs enthält, wird der Wert \texttt{0} eingesetzt.
 
-\captionof{table}{Ergebnisausschnitt}
+Die Ergebnisse in \autoref{tab:resultLastFm} zeigen, dass die über 75\% der von Michael Bay verwendeten Musiktitel bei Last.FM als Rocksongs gekennzeichnet sind. Für den Film \textit{Transformers: Age of Extinction} stellte bereits die Tunefind API keine Musiktitel zur Verfügung, bei der Beantwortung der Frage zu dem Wert 0 führt
+
+\pagebreak
+\captionof{table}{Ergebnisse zur alternativen Fragestellung}
 \label{tab:resultLastFm}
 \begin{tabular}{p{0.45\textwidth}|C{0.18\textwidth}|C{0.25\textwidth}}
-    \textbf{Film} & \textbf{Anz. Songs} & \textbf{Anz. Rocksongs} \\ \hline
+    \textbf{Film} & \textbf{Anz. Titel} & \textbf{Anz. Rocktitel} \\ \hline
     Transformers & 9 & 7 \\
     Transformers: Age of Extinction & 0 & 0 \\
     Transformers: Dark of the Moon & 10 & 9 \\
     Transformers: Revenge of the Fallen & 11 & 8\\
 \end{tabular}
 
-\pagebreak
-\begin{lstlisting}[caption={SPARQL-Anfrage zum Beantworten der Recherchefragestellung}, label={lst:questionSparql}]
+\begin{lstlisting}[caption={SPARQL-Anfrage zur Beantwortung der Recherchefragestellung}, label={lst:questionSparql}]
 SELECT ?movieName ?songName ?chartPosition ?daysAfterMovieRelease
 FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#>
 FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#>
@@ -596,6 +569,44 @@ WHERE {
     FILTER (!BOUND(?rankingsBeforeMovieRelease))
 }
 ORDER BY ?movieName ?songName ?daysAfterMovieRelease
+\end{lstlisting}
+
+
+\begin{lstlisting}[caption={SPARQL-Anfrage zur Beantwortung der alternativen Recherchefragestellung}, label={lst:questionSparql2}]
+SELECT ?movie (COALESCE(?taggedS, 0) as ?AnzahlSongs) (COALESCE(?rockS, 0) as ?RockSongs)
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/lastfm#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/references#>
+WHERE {
+    {
+        ?imdbmovie a dbpedia-owl:Film ;
+                    dbpprop:title ?movie ;
+                    dbpedia-owl:director imdb:Michael_Bay ;
+                    owl:sameAs ?tunefindFilm .
+    }
+    OPTIONAL {
+        SELECT (COUNT(DISTINCT ?song) as ?rockS) ?tunefindFilm
+        WHERE {
+            ?tunefindFilm tunefind:contains ?song .
+            ?song rdfs:label ?s ;
+                   owl:sameAs ?lastFmSong .
+            ?lastFmSong lastfm:tagged ?tag .
+            FILTER (CONTAINS(lcase(?tag), "rock"))
+        }
+        GROUP BY ?tunefindFilm
+    }
+    OPTIONAL {
+        SELECT (COUNT(DISTINCT ?song) as ?taggedS) ?tunefindFilm
+        WHERE {
+            ?tunefindFilm tunefind:contains ?song .
+            ?song rdfs:label ?s ;
+                   owl:sameAs ?lastFmSong .
+            ?lastFmSong lastfm:tagged ?tag .
+        }
+        GROUP BY ?tunefindFilm
+    }
+}
 \end{lstlisting}
 
 \bibliographystyle{lnig.bst}
