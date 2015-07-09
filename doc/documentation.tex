@@ -160,7 +160,7 @@ user-agent: "%appName%;%email%"
 
 Weiterhin ist der Endpunkt auf eine Anfrage pro Sekunde limitiert.
 
-Die \texttt{LoadToRdf}-Phase und somit die Durchführung der Datenakquise beginnt mit einer Anfrage an:\\
+Die \texttt{LoadFromWeb}-Phase und somit die Durchführung der Datenakquise beginnt mit einer Anfrage an:\\
 \texttt{https://www.tunefind.com/api/v1/movie}
 
 Das Ergebnis ist eine Liste mit allen in der Datenbank vorhandenen Filmen. Über die erhaltene ID können nun die Details zu jedem Film abgerufen werden. Dies geschieht mit Anfragen an:\\
@@ -256,7 +256,7 @@ Die Speicherung der extrahierten Daten erfolgt erneut im JSON-Format. Für den F
 ]
 \end{lstlisting}
 
-In der Konvertierungs-Phase wurden nachträglich Einschränkungen hinzugefügt, um die Anzahl der erzeugten Tripel zu verringern (siehe \ref{subsec:problems}). Es werden nur Filme übernommen, deren frühstes Veröffentlichungsdatum mindestens im Jahr 2005 liegt. Weiterhin werden nur die Veröffentlichungsdaten von Deutschland, Großbritannien sowie den Vereinigten Staaten und die ersten zehn Schauspieler konvertiert. Die Regisseure werden uneingeschränkt übernommen. Das dazu verwendete Schema zeigt \autoref{fig:imdbrdf}.
+In der Konvertierungs-Phase wurden nachträglich Einschränkungen hinzugefügt, um die Anzahl der erzeugten Tripel zu verringern (siehe \ref{subsec:problems}). Es werden nur Filme übernommen, deren frühstes Veröffentlichungsdatum mindestens im Jahr 2005 liegt. Weiterhin werden nur die Veröffentlichungsdaten von Deutschland, Großbritannien sowie den USA und die ersten zehn Schauspieler konvertiert. Die Regisseure werden uneingeschränkt übernommen. Das dazu verwendete Schema zeigt \autoref{fig:imdbrdf}.
 
 \begin{figure}[H]
     \centering
@@ -303,18 +303,19 @@ Wie auch bei der IMDb wurden nachträglich Einschränkungen zur Konvertierungs-P
 \subsection{Import in einen Triplestore}
 Als Triplestore wurde Stardog\footnote{\url{http://www.stardog.com}} in der Community Edition verwendet. Er zeichnet sich durch eine einfache Handhabung und Konfiguration aus.
 
-Es wurde versucht den Import der Tripel über die Python-Skripte zu realisieren. Jedoch benötigt \texttt{rdflib} für den Verbindungsaufbau zu Stardog eine Abhängigkeit, welche unter Windows nicht aufgelöst werden konnte. Als Alternative wurden die Dateien mit den Tripel manuell über die Web-Oberfläche von Stardog importiert. Für jede Datenquelle zuvor eine eigene Datenbank angelegt.
+Es wurde versucht den Import der Tripel über die Python-Skripte zu realisieren. Jedoch benötigt \texttt{rdflib} für den Verbindungsaufbau zu Stardog eine Abhängigkeit, welche unter Windows nicht aufgelöst werden konnte. Als Alternative wurden die Dateien mit den Tripeln manuell über die Web-Oberfläche von Stardog importiert. Für jede Datenquelle wurde zuvor eine eigene Datenbank angelegt.
 
 \section{Verlinkung von Ressourcen}
 
 Da über die \texttt{rdflib} von Python keine Verbindung zu Stardog hergestellt werden konnte, wurde auf die Programmiersprache C\# zurückgegriffen und die dort verfügbare Bibliothek \texttt{dotnetrdf}.
 
-Im ersten Schritt der Verlinkung werden die Datenbanken der Datenquellen zusammengeführt. Dazu wurde eine neue Datenbank \texttt{movies} angelegt. In dieser werden die Graphen der einzelnen Datenbanken als benannte Graphen abgespeichert.
+Im ersten Schritt der Verlinkung werden die Datenbanken der Datenquellen zusammengeführt. Dazu wurde eine neue Datenbank \texttt{movies} angelegt. In dieser wurden die Graphen der einzelnen Datenbanken als benannte Graphen abgespeichert.
 
-Anschließend werden über INSERT-Queries in einem neuen Graphen namens \texttt{refer}--\texttt{ences} die Beziehungen zwischen den Daten hinterlegt.
+Anschließend wurden über INSERT-Queries in einem neuen Graphen namens \texttt{refer}--\texttt{ences} die Beziehungen zwischen den Daten hinterlegt.
 
 \subsection{Referenzierung Tunefind und IMDb}
-Wie bereits in den Abschnitten zur Extraktion erwähnt, wird der Filmtitel von Tunefind bis zu den Daten der IMDb mitgeführt. Aufbauend darauf wird ein INSERT-Query (siehe \autoref{lst:refTunefindImdb}) benutzt, welcher ein String-Matching auf den Filmtitel ausführt um die Daten der IMDb mit den Daten von Tunefind verbindet. 
+\label{subsec:refTunefindImdb}
+Wie bereits in den Abschnitten zur Extraktion erwähnt, wurde der Filmtitel von Tunefind bis zu den Daten der IMDb mitgeführt. Aufbauend darauf wurde ein INSERT-Query (siehe \autoref{lst:refTunefindImdb}) benutzt, welcher ein String-Matching auf den Filmtitel ausführt um die Daten der IMDb mit den Daten von Tunefind verbindet. 
 
 \begin{lstlisting}[caption={SPARQL-Query zur Referenzierung von Tunefind und IMDb}, label={lst:refTunefindImdb}]
 INSERT {
@@ -338,7 +339,7 @@ WHERE {
 \end{lstlisting}
 
 \subsection{Referenzierung Tunefind und Charts}
-Für die Referenzierung der Musiktitel werden die Eigenschaften Name und Interpret genutzt. Dies funktioniert jedoch nicht so einfach wie bei den Filmen, da nicht davon ausgegangen werden kann, dass die Schreibweise der Eigenschaften bei beiden Datenquellen identisch ist.
+Für die Referenzierung der Musiktitel wurden die Eigenschaften Name und Interpret genutzt. Dies funktioniert jedoch nicht so einfach wie bei den Filmtitel (siehe \ref{subsec:refTunefindImdb}), da nicht davon ausgegangen werden kann, dass die Schreibweise der Eigenschaften bei beiden Datenquellen identisch ist.
 
 Es wurde sich für eine Zuordnung über einen Vergleich der Anfangszeichen beider Eigenschaften entschieden. Das Ziel dieses Vergleiches ist es, eine Zuordnung zu Erzeugen bevor verschiedene Schreibweisen diese verhindern. Eine solche unterschiedliche Schreibweise könnte z.B. die Angabe des Zweitkünstlers sein, wie im nachfolgenden Beispiel dargestellt.
 
@@ -356,7 +357,7 @@ Dieser Weg des Vergleiches hat den Nachteil, dass auch falsche Zuordnungen entst
     Artist & Michael Lington & Michael Mind\\
 \end{tabular}
 
-Die Anzahl solcher falschen Zuordnungen erwies sich nach Stichproben allerdings als gering und wird deshalb in Kauf genommen.
+Die Anzahl solcher falschen Zuordnungen erwies sich nach Stichproben allerdings als gering und wurde deshalb in Kauf genommen.
 
 Die Anzahl der zu vergleichenden Anfangszeichen wurde experimentell mit 7 bestimmt. Der daraus resultierende Query ist in \autoref{lst:refTunefindCharts} zu sehen.
 
@@ -400,11 +401,11 @@ Bei der Verlinkung der Ressourcen traten erstmals schwerwiegende Probleme auf. D
 
 \section{Anfrage an die Forschungswissensbasis}
 
-Nach der Verknüpfung der Datensätze liegt nun eine Datenbank mit vier Graphen vor. Drei Graphen davon enthalten die Daten von Tunefind, IMDb und Charts, der vierte Graph enthält die Tripel zu Verknüpfung der Daten.
+Nach der Verknüpfung der Datensätze liegt nun eine Datenbank mit vier Graphen vor. Drei Graphen davon enthalten die Daten von Tunefind, IMDb oder Charts, der vierte Graph enthält die Tripel zu Verknüpfung der Daten.
 
 \subsection{SPARQL-Anfrage}
 
-Die verwendete SPARQL-Abfrage ist in \autoref{lst:questionSparql} zu sehen. Zuerst werden alle Chart-Platz--ierungen von Musiktitel gesucht, welche maximal 100 Tage nach der Veröffent--lichung des Films liegen, in welchem der Titel vorkommt. Anschließend wird über einen \texttt{OPTIONAL}- \texttt{Join} die Anzahl der Chart-Platzierungen vor der Veröffentlichung des Films an die Ergebnisse angehängt. Im letzten Schritt wird nach Werten Filtern, bei welchen die eben angehängte Anzahl nicht vorhanden (\texttt{unbound}) ist.
+Die verwendete SPARQL-Abfrage ist in \autoref{lst:questionSparql} zu sehen. Zuerst werden alle Chart-Platzierungen von Musiktitel gesucht, welche maximal 100 Tage nach der Veröffent--lichung des Films liegen, in welchem der Titel vorkommt. Anschließend wird über einen \texttt{OPTIONAL}- \texttt{Join} die Anzahl der Chart-Platzierungen vor der Veröffentlichung des Films an die Ergebnisse angehängt. Im letzten Schritt wird nach Werten Filtern, bei welchen die eben angehängte Anzahl nicht vorhanden (\texttt{unbound}) ist.
 
 \subsection{Ergebnis der Anfrage} 
 
