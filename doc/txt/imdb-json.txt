@@ -1,0 +1,26 @@
+[  
+    {  
+        "directors":[  
+            "",
+            ...
+        ],
+        "cast":[
+            {
+                "name": "",
+                "screen_name": ""
+            }
+            ...,
+        ],
+        "release_info":[
+            {
+                "country": "",
+                "event": "",
+                "date": ""
+            }
+            ...,
+        ],
+        "title": "",
+        "imdbID": ""
+    },
+    ...
+]

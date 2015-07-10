@@ -1,0 +1,34 @@
+SELECT ?movie (COALESCE(?taggedS, 0) as ?AnzahlSongs) (COALESCE(?rockS, 0) as ?RockSongs)
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/lastfm#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/references#>
+WHERE {
+    {
+        ?imdbmovie a dbpedia-owl:Film ;
+                    dbpprop:title ?movie ;
+                    dbpedia-owl:director imdb:Michael_Bay ;
+                    owl:sameAs ?tunefindFilm .
+    }
+    OPTIONAL {
+        SELECT (COUNT(DISTINCT ?song) as ?rockS) ?tunefindFilm
+        WHERE {
+            ?tunefindFilm tunefind:contains ?song .
+            ?song rdfs:label ?s ;
+                   owl:sameAs ?lastFmSong .
+            ?lastFmSong lastfm:tagged ?tag .
+            FILTER (CONTAINS(lcase(?tag), "rock"))
+        }
+        GROUP BY ?tunefindFilm
+    }
+    OPTIONAL {
+        SELECT (COUNT(DISTINCT ?song) as ?taggedS) ?tunefindFilm
+        WHERE {
+            ?tunefindFilm tunefind:contains ?song .
+            ?song rdfs:label ?s ;
+                   owl:sameAs ?lastFmSong .
+            ?lastFmSong lastfm:tagged ?tag .
+        }
+        GROUP BY ?tunefindFilm
+    }
+}

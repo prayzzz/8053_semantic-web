@@ -50,6 +50,8 @@
 
 Welche Musiktitel sind nach der Verwendung in einem Kinofilm in den Top 50 der Charts aufgetaucht?
 
+\paragraph{Projektdateien} Alle Projektdateien sind auf GitHub\footnote{\href{https://github.com/prayzzz/movie-soundtracks}{https://github.com/prayzzz/movie-soundtracks}} zu finden.
+
 \section{Inhaltliche Interpretation der Fragestellung}
 
 Die Verwendung von Musik in Filmen ist ein gängiges Mittel um den gezeigten Bildern mehr Ausdruck zu verleihen und die Stimmung hervorzuheben. Neben der klassischen Filmmusik, welche individuell für den Film angefertigt wird, werden auch häufig kommerzielle Titel von Künstlern verschiedenster Stilrichtungen und Bekanntheitsgrade verwendet.
@@ -89,7 +91,7 @@ Tunefind ist eine Community geführte Datenbank für Musiktitel, welche in Serie
 
 \subsection{OMDb - The Open Movie Database}
 
-Die Open Movie Database ist eine Web-Service, welcher eine Auswahl an Daten der IMDB über eine API zur Verfügung stellt. Es ist möglich einen Film über seinen  Titel oder seine IMDb ID zu finden. Die Suche über den Titel funktioniert dabei wie eine typische Suchfunktion und liefert auch bei verschiedenen Schreibweisen des Titels zuverlässig Ergebnisse.
+Die Open Movie Database ist ein Web-Service, welcher eine Auswahl an Daten der IMDb über eine API zur Verfügung stellt. Es ist möglich einen Film über seinen  Titel oder seine IMDb ID zu finden. Die Suche über den Titel funktioniert dabei wie eine typische Suchfunktion und liefert auch bei verschiedenen Schreibweisen des Titels zuverlässig Ergebnisse.
 
 \begin{tabular}{l|p{9cm}}
     Link & \url{http://www.omdbapi.com/} \\
@@ -113,7 +115,7 @@ Die Internet Movie Database ist die größte Datenbank für Filme, Serien und Sp
 
 \subsection{Offizielle Charts}
 
-Die Offiziellen Charts werden von der GfK zur Verfügung gestellt. Seit dem 02.01.1978 werden hier wöchentlich die Verkaufszahlen von Musik in Deutschland mit einem Ranking von 1 bis 100 bewertet. Dabei gilt es verschiedene Unterteilungen wie z.B. Single, Album und Compilation.
+Die Offiziellen Charts werden von der GfK zur Verfügung gestellt. Seit dem 02.01.1978 werden hier wöchentlich die Verkaufszahlen von Musik in Deutschland mit einem Ranking von 1 bis 100 bewertet. Dabei gilt es verschiedene Unterteilungen wie z.B. \textit{Single}, \textit{Album} und \textit{Compilation}.
 
 \begin{tabular}{l|p{9cm}}
     Link & \url{https://www.offiziellecharts.de} \\
@@ -132,7 +134,7 @@ Die erzeugten Dateien werden im Ordner \texttt{data/} abgelegt. Die Dateinamen s
 \subsection{Verwendete Bibliotheken}
 
 \paragraph{HTML Extraktion}
-Für die Extraktion von Daten aus HTML-Dateien wird die Bibliothek \texttt{beautifulsoup4  (v4.3.2)}\footnote{\href{http://www.crummy.com/software/BeautifulSoup/}{http://www.crummy.com/software/BeautifulSoup/}} verwendet. Sie ermöglicht ein einfaches arbeiten auf dem DOM-Baum.
+Für die Extraktion von Daten aus HTML-Dateien wird die Bibliothek \texttt{beautifulsoup4  (v4.3.2)}\footnote{\href{http://www.crummy.com/software/BeautifulSoup/}{http://www.crummy.com/software/BeautifulSoup/}} verwendet. Sie ermöglicht ein Einfaches arbeiten auf dem DOM-Baum.
 
 \paragraph{RDF}
 Für das Erstellen der Tripel sowie die Speicherung im Turtle-Format wird \texttt{rdflib (v4.2.0)}\footnote{\href{https://github.com/RDFLib/rdflib}{https://github.com/RDFLib/rdflib}} verwendet. 
@@ -142,12 +144,7 @@ Für das Erstellen der Tripel sowie die Speicherung im Turtle-Format wird \textt
 Tunefind stellt eine API bereit, welche die Daten der Webseite im JSON- oder XML-Format abrufbar macht. Für die Benutzung der API war eine Registrierung erforderlich. Anschließend konnte ein API Benutzernamen und ein API Passwort angefordert werden.
 Um den Endpunkt von Tunefind erfolgreich anzusprechen, mussten einige Besonderheiten bzgl. des HTTP-Request-Headers beachtet werden. \autoref{lst:httpHeader} zeigt den verwendeten Header.
 
-\begin{lstlisting}[caption={HTTP-Request-Header}, label={lst:httpHeader}]
-accept: "text/html, application/json"
-accept-encoding: "gzip, deflate"
-authorization: "Basic %login%"
-user-agent: "%appName%;%email%"
-\end{lstlisting}
+\lstinputlisting[caption={HTTP-Request-Header}, label={lst:httpHeader}]{txt/http-request-header.txt}
 
 \begin{description}
     \item[accept] \hfill \\
@@ -172,21 +169,7 @@ Das Ergebnis ist eine Liste mit allen in der Datenbank vorhandenen Filmen. Über
 Diese Details enthalten unter anderem die Musiktitel, welche zu dem ausgewählten Film in der Datenbank hinterlegt sind.
 Mit diesen Daten wird eine Liste mit allen verfügbaren Filmen und ihren Musiktiteln erstellt. \autoref{lst:tunefindJson} zeigt das JSON-Format, in welchem das dabei entstandene Ergebnis abgespeichert wird.
 
-\begin{lstlisting}[caption={Tunefind JSON-Format}, label={lst:tunefindJson}]
-[  
-    {  
-        "soundtrack":[  
-            {
-                "artist": "",
-                "title": ""
-            },
-        ...
-        ],
-        "title": ""
-    },
-    ...
-]
-\end{lstlisting}
+\lstinputlisting[caption={Tunefind JSON-Format}, label={lst:tunefindJson}]{txt/tunefind-json.txt}
 
 Die \texttt{ConvertToRdf}-Phase lädt die abgespeicherten Daten wieder und konvertiert sie in Tripel. Das dazu verwendete Schema zeigt \autoref{fig:tunefindrdf}.
 
@@ -205,15 +188,7 @@ Die OMDb wird als Zwischenschritt für die Extraktion der Daten von der IMDb (si
 
 Als Ergebnis werden die wichtigsten Informationen über den angegebenen Film zurück--geliefert. Darunter ist auch die ID des Films in der IMDb. \autoref{lst:omdbJson} zeigt das JSON-Format, in welchem der Filmtitel von Tunefind und die IMDb ID abgespeichert werden.
 
-\begin{lstlisting}[caption={OMDb JSON-Format}, label={lst:omdbJson}]
-[  
-    {  
-        "title": ""
-        "imdbid": ""
-    },
-    ...
-]
-\end{lstlisting}
+\lstinputlisting[caption={OMDb JSON-Format}, label={lst:omdbJson}]{txt/omdb-json.txt}
 
 Eine Konvertierung in Tripel ist bei dieser Datenquelle nicht nötigt, da sie nur als Zwischenschritt zur Gewinnung der IMDb ID dient.
 
@@ -230,34 +205,7 @@ Weiterhin werden die Schauspieler und Regisseure aus der \textit{Credit}-Übersi
 
 Die Speicherung der extrahierten Daten erfolgt erneut im JSON-Format. Für den Filmtitel wird dabei statt dem in der IMDb hinterlegten Titel der Titel von Tunefind benutzt. Dies ermöglicht bei der späteren Verlinkung der Ressourcen ein einfaches Zuordnen der Daten. \autoref{lst:imdbJson} zeigt das JSON-Format, in welchem die Daten abgespeichert werden.
 
-\begin{lstlisting}[caption={IMDb JSON-Format}, label={lst:imdbJson}]
-[  
-    {  
-        "directors":[  
-            "",
-            ...
-        ],
-        "cast":[
-            {
-                "name": "",
-                "screen_name": ""
-            }
-            ...,
-        ],
-        "release_info":[
-            {
-                "country": "",
-                "event": "",
-                "date": ""
-            }
-            ...,
-        ],
-        "title": "",
-        "imdbID": ""
-    },
-    ...
-]
-\end{lstlisting}
+\lstinputlisting[caption={IMDb JSON-Format}, label={lst:imdbJson}]{txt/imdb-json.txt}
 
 In der Konvertierungs-Phase wurden nachträglich Einschränkungen hinzugefügt, um die Anzahl der erzeugten Tripel zu verringern (siehe \ref{subsec:problems}). Es werden nur Filme übernommen, deren frühstes Veröffentlichungsdatum mindestens im Jahr 2005 liegt. Weiterhin werden nur die Veröffentlichungsdaten von Deutschland, Großbritannien sowie den USA und die ersten zehn Schauspieler konvertiert. Die Regisseure werden uneingeschränkt übernommen. Das dazu verwendete Schema zeigt \autoref{fig:imdbrdf}.
 
@@ -277,22 +225,7 @@ Die Akquirierung der Daten erfolgt in einem Zeitraum vom 01.01.2000 bis zum 31.0
 
 Die Extraktion der Daten wird auf die ersten 50 Chart-Einträge jeder Woche begrenzt. \autoref{lst:chartsDeJson} zeigt das JSON-Format, in welchem die Daten abgespeichert werden.
 
-\begin{lstlisting}[caption={Offizielle Charts JSON-Format}, label={lst:chartsDeJson}]
-[  
-    {
-        "tracks": [
-            {
-                "artist": "",
-                "title": "",
-                "pos": ""
-            }
-            ...,
-        ]
-        "date": ""
-    },
-    ...
-]
-\end{lstlisting}
+\lstinputlisting[caption={Offizielle Charts JSON-Format}, label={lst:chartsDeJson}]{txt/charts-json.txt}
 
 Wie auch bei der IMDb wurden nachträglich Einschränkungen zur Konvertierungs-Phase hinzugefügt, um die Anzahl der Tripel zu verringern. Entsprechend der Einschränkung bei der IMDb, werden nur Charts ab dem 01.01.2005 konvertiert. Das dazu verwendete Schema zeigt \autoref{fig:chartrdf}.
 
@@ -322,32 +255,13 @@ Anschließend wurden über INSERT-Queries in einem neuen Graphen namens \texttt{
 
 Wie bereits in den Abschnitten zur Extraktion erwähnt, wurde der Filmtitel von Tunefind bis zu den Daten der IMDb mitgeführt. Aufbauend darauf wurde ein INSERT-Query (siehe \autoref{lst:refTunefindImdb}) benutzt, welcher ein String-Matching auf den Filmtitel ausführt um die Daten der IMDb mit den Daten von Tunefind verbindet. 
 
-\begin{lstlisting}[caption={SPARQL-Query zur Referenzierung von Tunefind und IMDb}, label={lst:refTunefindImdb}]
-INSERT {
-    GRAPH <http://imn.htwk-leipzig.de/pbachman/ontologies/references#> { 
-        ?imdbFilm owl:sameAs ?tunefindFilm .
-        ?tunefindFilm owl:sameAs ?imdbFilm . }
-}
-USING <http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#>
-USING <http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#>
-WHERE {
-    ?imdbFilm rdf:type dbpedia-owl:Film ;
-               rdfs:label ?imdbFilmLabel .
-    ?tunefindFilm rdf:type dbpedia-owl:Film ;
-               rdfs:label ?tunefindFilmLabel .
-    
-    FILTER(STRSTARTS(STR(?imdbFilm), "http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#"))
-    FILTER(STRSTARTS(STR(?tunefindFilm), "http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#"))
-    
-    FILTER(lcase(STR(?tunefindFilmLabel)) = lcase(STR(?imdbFilmLabel)))
-}
-\end{lstlisting}
+\lstinputlisting[caption={SPARQL-Query zur Referenzierung von Tunefind und IMDb}, label={lst:refTunefindImdb}]{txt/tunefind-imdb-ref-sparql.txt}
 
 \subsection{Referenzierung Tunefind und Charts}
 
 Für die Referenzierung der Musiktitel wurden die Eigenschaften Name und Interpret genutzt. Dies funktioniert jedoch nicht so einfach wie bei den Filmtitel (siehe \ref{subsec:refTunefindImdb}), da nicht davon ausgegangen werden kann, dass die Schreibweise der Eigenschaften bei beiden Datenquellen identisch ist.
 
-Es wurde sich für eine Zuordnung über einen Vergleich der Anfangszeichen beider Eigenschaften entschieden. Das Ziel dieses Vergleiches ist es, eine Zuordnung zu Erzeugen bevor verschiedene Schreibweisen diese verhindern. Eine solche unterschiedliche Schreibweise könnte z.B. die Angabe des Zweitkünstlers sein, wie im nachfolgenden Beispiel dargestellt.
+Es wurde sich für eine Zuordnung über einen Vergleich der Anfangszeichen beider Eigenschaften entschieden. Das Ziel dieses Vergleiches ist es, eine Zuordnung zu erzeugen bevor verschiedene Schreibweisen diese verhindern. Eine solche unterschiedliche Schreibweise könnte z.B. die Angabe des Zweitkünstlers sein, wie im nachfolgenden Beispiel dargestellt.
 
 \begin{tabular}{p{0.1\textwidth}|p{0.39\textwidth}|p{0.39\textwidth}}
      & \textbf{Tunefind} & \textbf{Charts} \\\hline
@@ -367,38 +281,7 @@ Die Anzahl solcher falschen Zuordnungen erwies sich nach Stichproben allerdings 
 
 Die Anzahl der zu vergleichenden Anfangszeichen wurde experimentell mit 7 bestimmt. Der daraus resultierende Query ist in \autoref{lst:refTunefindCharts} zu sehen.
 
-\begin{lstlisting}[caption={SPARQL-Query zur Referenzierung von Tunefind und Charts}, label={lst:refTunefindCharts}]
-INSERT {
-    GRAPH <http://imn.htwk-leipzig.de/pbachman/ontologies/references#> { 
-        ?tunefindSong owl:sameAs ?chartSong .
-        ?chartSong owl:sameAs ?tunefindSong .        
-        ?tunefindArtist owl:sameAs ?chartArtist .
-        ?chartArtist owl:sameAs ?tunefindArtist .}
-}
-USING <http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#>
-USING <http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#>
-WHERE {
-    ?tunefindSong a dbpedia-owl:Song ;
-                   dbpedia-owl:artist ?tunefindArtist ;
-                   dbpprop:title ?tunefindSongTitle .
-    ?tunefindArtist a dbpedia-owl:MusicalArtist ;
-                     dbpprop:name ?tunefindArtistName .
-    ?chartSong a dbpedia-owl:Song ;
-                dbpedia-owl:artist ?chartArtist ;
-                dbpprop:title ?chartSongTitle .
-    ?chartArtist a dbpedia-owl:MusicalArtist ;
-                  dbpprop:name ?chartArtistName .
-    
-    FILTER(STRSTARTS(STR(?chartSong), "http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#"))
-    FILTER(STRSTARTS(STR(?tunefindSong), "http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#"))
-    
-    FILTER(lcase(SUBSTR(STR(?tunefindSongTitle), 1, 7)) =
-    lcase(SUBSTR(STR(?chartSongTitle), 1, 7)))
-    
-    FILTER(lcase(SUBSTR(STR(?tunefindArtistName), 1, 7)) =
-    lcase(SUBSTR(STR(?chartArtistName), 1, 7)))
-}
-\end{lstlisting}
+\lstinputlisting[caption={SPARQL-Query zur Referenzierung von Tunefind und Charts}, label={lst:refTunefindCharts}]{txt/tunefind-charts-ref-sparql.txt}
 
 \subsection{Probleme}
 \label{subsec:problems}
@@ -444,14 +327,14 @@ Das Ergebnis der Abfrage ist eine Liste aller Musiktitel, welche bis maximal 100
 \footnotetext{Tage nach Veröffentlichung des Films}
 \end{small}
     
-\section{Interpretation und Zusammenfassung}
+\section{Interpretation der Ergebnisse}
 
 Die Ergebnisse der Anfrage an die Wissensbasis zeigen, dass es Musiktitel gibt, welche von der Veröffentlichung eines Films profitieren. Da die Wissensbasis jedoch begrenzt ist und mit den Veröffentlichungsdaten von Filmen nur einen von vielen Einflüssen auf die Verkaufszahlen von Musiktitel widerspiegelt, dürfen die Ergebnisse nicht als repräsentativ angesehen werden.
 
-Aufgrund der geringen Aussagekraft der Recherchefragestellung, wurde eine zweite Fragestellung zu Beantwortung herangezogen:\\
+Aufgrund der geringen Aussagekraft der Antwort auf die Recherchefragestellung, wurde eine zweite Fragestellung zu Beantwortung herangezogen:\\
 \textit{Verwendet der Regisseur Michael Bay mehr Rocksongs als andere Titel in seinen Filmen?}
 
-Um diese Fragestellung zu beantworten, mussten die Musiktitel, welche von Tunefind gewonnen wurden, in Genre eingeteilt werden. Um dies zu erreichen, wurde Last.FM als Datenquelle hinzugezogen. Eine kurze Erläuterung zu der zusätzlichen Datenquelle findet sich in \autoref{sec:appendix}.
+Um diese Fragestellung zu beantworten, mussten die Musiktitel, welche von Tunefind gewonnen wurden, in Genre eingeteilt werden. Dies wurde durch das hinzuziehen von Last.FM als Datenquelle erreicht. Eine Erläuterung zu der zusätzlichen Datenquelle findet sich in \autoref{sec:appendix}.
 
 \pagebreak
 \section{Anhang}
@@ -475,16 +358,7 @@ Die Daten von Last.FM sind über eine API erreichbar. Um diese zu benutzen ist e
 
 Für die Verbindung zur API wurde die Bibliothek \texttt{pylast (1.2.1)}\footnote{\href{https://github.com/pylast/pylast}{https://github.com/pylast/pylast}} eingesetzt. Für jeden Musiktitel, welcher von Tunefind gewonnen wurde, werden in der \texttt{LoadFromWeb}-Phase die ersten fünf \textit{TopTags} abgerufen. \autoref{lst:jsonLastfm} zeigt das JSON-Format in welchem die Daten abgespeichert werden.
 
-\begin{lstlisting}[caption={JSON-Format Last.FM}, label={lst:jsonLastfm}]
-[
-    {
-        "title": "",
-        "tags": ["", ... ],
-        "artist": "",
-    },
-    ...
-]
-\end{lstlisting}
+\lstinputlisting[caption={Last.FM JSON-Format}, label={lst:jsonLastfm}]{txt/lastfm-json.txt}
 
 Die Konvertierung der Daten in Tripel erfolgt ohne weitere Einschränkungen. Das dazu verwendete Schema zeigt \autoref{fig:lastfmrdf}.
 
@@ -495,15 +369,17 @@ Die Konvertierung der Daten in Tripel erfolgt ohne weitere Einschränkungen. Das
     \label{fig:lastfmrdf}
 \end{figure}
 
-\subsection{Referenzierung Tunefind und Last.FM}
+\subsection{Referenzierung Last.FM mit Tunefind und Charts}
 
-Die Referenzierung der Musiktitel erweist sich als einfach, da der Titel und der Künstlername von Tunefind übernommen wurden. Die Referenzierung wurde deshalb über eine einfaches String-Matching realisiert.
+Die Referenzierung mit den Daten von Tunefind erweist sich als einfach, da der Titel und der Künstlername von Tunefind übernommen wurden. Sie wurde deshalb über ein einfaches String-Matching realisiert.
+
+Durch die bereits bestehende Verbindung zwischen Tunefind-Daten und Chart-Daten, war die Referenzierung zwischen Last.FM-Daten und Chart-Daten trivial.
 
 \subsection{Abfrage und Ergebnisse}
 
 Die verwendete SPARQL-Abfrage für die alternative Recherchefragestellung ist in \autoref{lst:questionSparql2} zu sehen. Zuerst werden alle Filme vom Regisseur Michael Bay gesucht, anschließend wird die Anzahl der Musiktitel und der Rocktitel für jeden Film gezählt. Wenn ein Film keine Songs oder Rocksongs enthält, wird der Wert \texttt{0} eingesetzt.
 
-Die Ergebnisse in \autoref{tab:resultLastFm} zeigen, dass die über 75\% der von Michael Bay verwendeten Musiktitel bei Last.FM als Rocksongs gekennzeichnet sind. Für den Film \textit{Transformers: Age of Extinction} stellte bereits die Tunefind API keine Musiktitel zur Verfügung, bei der Beantwortung der Frage zu dem Wert 0 führt
+Die Ergebnisse in \autoref{tab:resultLastFm} zeigen, dass über 75\% der von Michael Bay verwendeten Musiktitel bei Last.FM als Rocksongs gekennzeichnet sind. Für den Film \textit{Transformers: Age of Extinction} stellte bereits die Tunefind API keine Musiktitel zur Verfügung, was bei der Beantwortung der Frage zu dem Wert 0 führt
 
 \pagebreak
 \captionof{table}{Ergebnisse zur alternativen Fragestellung}
@@ -516,98 +392,9 @@ Die Ergebnisse in \autoref{tab:resultLastFm} zeigen, dass die über 75\% der von
     Transformers: Revenge of the Fallen & 11 & 8\\
 \end{tabular}
 
-\begin{lstlisting}[caption={SPARQL-Anfrage zur Beantwortung der Recherchefragestellung}, label={lst:questionSparql}]
-SELECT ?movieName ?songName ?chartPosition ?daysAfterMovieRelease
-FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#>
-FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#>
-FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#>
-FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/references#>
-WHERE { 
-    {
-        SELECT ?movieName ?songName ?chartPosition ?daysAfterMovieRelease ?chartDate ?movieReleaseDate ?chartSong
-        WHERE {
-            ?imdbMovie rdfs:label ?movieName;
-                        imdb:releasedIn ?releaseCountry ;
-                        owl:sameAs ?tfMovie .
-            ?releaseCountry rdfs:label "Germany";
-                              dbpedia-owl:publicationDate ?movieReleaseDate .
-            ?tfMovie tunefind:contains ?tfSong .
-            ?tfSong owl:sameAs ?chartSong .
-            ?chartSong rdfs:label ?songName .
-            ?chart a charts_de:Chart;
-                    dbpedia-owl:publicationDate ?chartDate ;
-                    charts_de:rankedSong ?rankedSong .
-            ?rankedSong charts_de:song ?chartSong ;
-                         charts_de:position ?chartPosition.
-            
-            bind(year(?chartDate) - year(?movieReleaseDate) as ?yearDiff)
-            bind((month(?chartDate) - month(?movieReleaseDate)) + 12 * ?yearDiff as ?monthDiff)
-            bind((day(?chartDate) - day(?movieReleaseDate)) + 30 * ?monthDiff as ?daysAfterMovieRelease)
-            
-            FILTER(STRSTARTS(STR(?imdbMovie), "http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#"))
-            FILTER(STRSTARTS(STR(?chartSong), "http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#"))
-            FILTER (STR(?chartDate) > STR(?movieReleaseDate))
-            FILTER (?daysAfterMovieRelease <= 100)
-        }
-    }
-    OPTIONAL 
-    {
-        SELECT (COUNT(?outerChart) as ?rankingsBeforeMovieRelease) ?chartSong ?movieName
-        WHERE {           
-            ?imdbMovie rdfs:label ?movieName;
-                        imdb:releasedIn ?releaseCountry ;
-                        owl:sameAs ?tfMovie .
-            ?releaseCountry rdfs:label "Germany";
-                              dbpedia-owl:publicationDate ?movieReleaseDate .
-            ?outerRankedSong charts_de:song ?chartSong .
-            ?outerChart charts_de:rankedSong ?outerRankedSong ;
-                          dbpedia-owl:publicationDate ?outerChartDate .
-            FILTER (STR(?outerChartDate) < STR(?movieReleaseDate))
-        }
-        GROUP BY ?chartSong ?movieName
-    }
-    FILTER (!BOUND(?rankingsBeforeMovieRelease))
-}
-ORDER BY ?movieName ?songName ?daysAfterMovieRelease
-\end{lstlisting}
+\lstinputlisting[caption={SPARQL-Anfrage zur Beantwortung der Recherchefragestellung}, label={lst:questionSparql}]{txt/songs-after-movie-release-sparql.txt}
 
-
-\begin{lstlisting}[caption={SPARQL-Anfrage zur Beantwortung der alternativen Recherchefragestellung}, label={lst:questionSparql2}]
-SELECT ?movie (COALESCE(?taggedS, 0) as ?AnzahlSongs) (COALESCE(?rockS, 0) as ?RockSongs)
-FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#>
-FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/lastfm#>
-FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#>
-FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/references#>
-WHERE {
-    {
-        ?imdbmovie a dbpedia-owl:Film ;
-                    dbpprop:title ?movie ;
-                    dbpedia-owl:director imdb:Michael_Bay ;
-                    owl:sameAs ?tunefindFilm .
-    }
-    OPTIONAL {
-        SELECT (COUNT(DISTINCT ?song) as ?rockS) ?tunefindFilm
-        WHERE {
-            ?tunefindFilm tunefind:contains ?song .
-            ?song rdfs:label ?s ;
-                   owl:sameAs ?lastFmSong .
-            ?lastFmSong lastfm:tagged ?tag .
-            FILTER (CONTAINS(lcase(?tag), "rock"))
-        }
-        GROUP BY ?tunefindFilm
-    }
-    OPTIONAL {
-        SELECT (COUNT(DISTINCT ?song) as ?taggedS) ?tunefindFilm
-        WHERE {
-            ?tunefindFilm tunefind:contains ?song .
-            ?song rdfs:label ?s ;
-                   owl:sameAs ?lastFmSong .
-            ?lastFmSong lastfm:tagged ?tag .
-        }
-        GROUP BY ?tunefindFilm
-    }
-}
-\end{lstlisting}
+\lstinputlisting[caption={SPARQL-Anfrage zur Beantwortung der alternativen Recherchefragestellung}, label={lst:questionSparql2}]{txt/rocksongs-michael-bay-sparql.txt}
 
 \bibliographystyle{lnig.bst}
 \bibliography{Projektdokumentation}

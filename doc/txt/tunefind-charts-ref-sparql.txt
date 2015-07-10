@@ -1,0 +1,30 @@
+INSERT {
+    GRAPH <http://imn.htwk-leipzig.de/pbachman/ontologies/references#> { 
+        ?tunefindSong owl:sameAs ?chartSong .
+        ?chartSong owl:sameAs ?tunefindSong .        
+        ?tunefindArtist owl:sameAs ?chartArtist .
+        ?chartArtist owl:sameAs ?tunefindArtist .}
+}
+USING <http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#>
+USING <http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#>
+WHERE {
+    ?tunefindSong a dbpedia-owl:Song ;
+                   dbpedia-owl:artist ?tunefindArtist ;
+                   dbpprop:title ?tunefindSongTitle .
+    ?tunefindArtist a dbpedia-owl:MusicalArtist ;
+                     dbpprop:name ?tunefindArtistName .
+    ?chartSong a dbpedia-owl:Song ;
+                dbpedia-owl:artist ?chartArtist ;
+                dbpprop:title ?chartSongTitle .
+    ?chartArtist a dbpedia-owl:MusicalArtist ;
+                  dbpprop:name ?chartArtistName .
+    
+    FILTER(STRSTARTS(STR(?chartSong), "http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#"))
+    FILTER(STRSTARTS(STR(?tunefindSong), "http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#"))
+    
+    FILTER(lcase(SUBSTR(STR(?tunefindSongTitle), 1, 7)) =
+    lcase(SUBSTR(STR(?chartSongTitle), 1, 7)))
+    
+    FILTER(lcase(SUBSTR(STR(?tunefindArtistName), 1, 7)) =
+    lcase(SUBSTR(STR(?chartArtistName), 1, 7)))
+}
