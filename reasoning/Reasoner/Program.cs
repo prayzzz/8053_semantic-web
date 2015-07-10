@@ -26,6 +26,10 @@ namespace Reasoner
 
         private static Settings settings;
 
+        /// <summary>
+        /// executes the reasoning
+        /// </summary>
+        /// <param name="args"></param>
         static void Main(string[] args)
         {
             settings = LoadSettings();
@@ -35,7 +39,6 @@ namespace Reasoner
 
             MergeGraphs();
             AddReferenceGraph();
-            //RemoveObsoleteTriples();
 
             stopwatch.Stop();
 
@@ -45,6 +48,9 @@ namespace Reasoner
             Console.Read();
         }
 
+        /// <summary>
+        /// Merges the graphs from IMDb, LastFM and Charts_de into a new database
+        /// </summary>
         private static void MergeGraphs()
         {
             Log("Executing MergeGraphs()");
@@ -112,6 +118,9 @@ namespace Reasoner
             writer.Save(movieGraph, @"01_Movies.ttl");
         }
 
+        /// <summary>
+        /// Executes the referencing queries
+        /// </summary>
         private static void AddReferenceGraph()
         {
             Log("Executing AddReferenceGraph()");
@@ -132,26 +141,11 @@ namespace Reasoner
             Log("Inserting Chart song references...");
             movieStore.Query(File.ReadAllText(ReferenceChartsDe1Query));
         }
-
-        private static void RemoveObsoleteTriples()
-        {
-            Log("Connecting to Movie store...");
-            var movieStore = new StardogConnector(settings.ServerIp, MoviesDbName, settings.Login, settings.Password);
-            movieStore.Timeout = int.MaxValue;
-
-            Log("Removing obsolete films...");
-            movieStore.Query(File.ReadAllText(@"Queries\05a_Remove_ObsoleteFilms.rq"));
-
-            Log("Removing obsolete TuneFind songs...");
-            movieStore.Query(File.ReadAllText(@"Queries\05b_Remove_ObsoleteTunefindSongs.rq"));
-
-            Log("Removing obsolete LastFm songs...");
-            movieStore.Query(File.ReadAllText(@"Queries\05c_Remove_ObsoleteLastFmSongs.rq"));
-
-            Log("Removing obsolete artists...");
-            movieStore.Query(File.ReadAllText(@"Queries\05d_Remove_ObsoleteArtists.rq"));
-        }
-
+        
+        /// <summary>
+        /// Helper method to setup a new graph with all namespaces
+        /// </summary>
+        /// <returns></returns>
         private static Graph SetupMovieGraph()
         {
             var movieGraph = new Graph();

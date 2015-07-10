@@ -15,7 +15,7 @@ using VDS.RDF.Storage;
 namespace Questioner
 {
     /// <summary>
-    /// Interaktionslogik für MainWindow.xaml
+    /// MainWindow of the Questioner Application
     /// </summary>
     public partial class MainWindow
     {
@@ -45,6 +45,9 @@ namespace Questioner
             this.LoadFiles();
         }
 
+        /// <summary>
+        /// Loads available questions from QuestionsDir
+        /// </summary>
         private void LoadFiles()
         {
             if (!Directory.Exists(QuestionsDir))
@@ -59,6 +62,11 @@ namespace Questioner
             }
         }
 
+        /// <summary>
+        /// Connects to a stardog store using the entered data
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
             var ip = this.IpTextBox.Text;
@@ -84,6 +92,11 @@ namespace Questioner
             }
         }
 
+        /// <summary>
+        /// Exectues the query entered in QuestionTextBox asynchronous
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void ExecuteButton_Click(object sender, RoutedEventArgs e)
         {
             var q = this.QuestionTextBox.Text;
@@ -103,7 +116,11 @@ namespace Questioner
                 MessageBox.Show(this, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
+        
+        /// <summary>
+        /// executes the query given query
+        /// </summary>
+        /// <param name="s">sparql query to execute</param>
         private void ExecuteQuery(string q)
         {
             var queryResult = this.connector.Query(q) as SparqlResultSet;
