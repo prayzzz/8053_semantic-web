@@ -1,3 +1,14 @@
+"""
+LoadFromWeb:
+    This skript reads in the data from [JSON_IN_FILE] and uses the title and artist to get the top 5 tags for each song
+    from http://www.last.fm/
+    The data will be saved to ./data/[JSON_OUT_FILE]
+
+ConvertToRdf:
+    This skript converts the data read from ./data/[JSON_OUT_FILE] to triples.
+    The data will be saved to ./data/[RDF_OUT_FILE]
+"""
+
 import getopt
 from multiprocessing import Pool
 import sys
@@ -22,6 +33,10 @@ NS_DBPPROP = Namespace("http://dbpedia.org/property/")
 
 
 def convert_to_rdf():
+    """
+    Converts the read data to triples
+    """
+
     print ""
     print "Convert to RDF..."
 

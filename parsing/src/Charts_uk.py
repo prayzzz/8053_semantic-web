@@ -1,3 +1,7 @@
+"""
+    This skript is unfinished and was not used
+"""
+
 from datetime import datetime, timedelta
 import getopt
 from multiprocessing import Pool

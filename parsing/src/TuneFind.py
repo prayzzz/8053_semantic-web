@@ -1,3 +1,13 @@
+"""
+LoadFromWeb:
+    This skript gets all movies and their songs from http://www.tunefind.com/
+    The data will be saved to ./data/[JSON_OUT_FILE]
+
+ConvertToRdf:
+    This skript converts the data read from ./data/[JSON_OUT_FILE] to triples.
+    The data will be saved to ./data/[RDF_OUT_FILE]
+"""
+
 import getopt
 import json
 import sys
@@ -8,7 +18,6 @@ import StringIO
 from time import sleep
 
 from rdflib import Namespace, Graph, URIRef, RDF, RDFS, Literal
-import re
 
 import common
 
@@ -20,7 +29,6 @@ JSON_OUT_FILE = "tunefind.json"
 RDF_OUT_FILE = "tunefind.ttl"
 LOAD_FROM_WEB = False
 CONVERT_TO_RDF = False
-LIMIT = 10
 
 EP_TUNEFIND_MOVIES = "https://www.tunefind.com/api/v1/movie"
 EP_TUNEFIND_MOVIE_SONGS = "https://www.tunefind.com/api/v1/movie/%s"
@@ -31,11 +39,11 @@ NS_DBPEDIA_OWL = Namespace("http://dbpedia.org/ontology/")
 NS_DBPPROP = Namespace("http://dbpedia.org/property/")
 
 
-def check_for_track(g, title):
-    query = "ASK WHERE { ?song a dbpedia-owl:Song; dbpprop:title ?title . FILTER (?title = \"%s\")  }"
-    return g.query(query % title).askAnswer
-
 def convert_to_rdf():
+    """
+    Converts the read data to triples
+    """
+
     print ""
     print "Convert to RDF..."
 
@@ -61,7 +69,7 @@ def convert_to_rdf():
             song = URIRef(BASE_URI % common.encodeString(u"{0:s} - {1:s}".format(s['artist'],  s["title"])))
             g.add((song, RDF.type, NS_DBPEDIA_OWL.Song))
             g.add((song, RDFS.label, Literal(u"{0:s} - {1:s}".format(s['artist'],  s["title"]))))
-            g.add((song, NS_DBPPROP.title, Literal( s["title"])))
+            g.add((song, NS_DBPPROP.title, Literal(s["title"])))
             g.add((song, NS_DBPEDIA_OWL.artist, artist))
 
             g.add((movie, NS_TUNEFIND.contains, song))
@@ -70,6 +78,10 @@ def convert_to_rdf():
 
 
 def parse_response(response):
+    """
+    decompresses a gzip compressed response
+    """
+
     if response.info().get('Content-Encoding') != 'gzip':
         return response.read()
 
@@ -79,6 +91,10 @@ def parse_response(response):
 
 
 def add_header(request):
+    """
+    adds the needed header entries to the given request
+    """
+
     base64string = base64.encodestring('%s:%s' % (USERNAME, PASSWORD)).replace('\n', '')
     request.add_header("accept", "text/html, application/json")
     request.add_header("accept-encoding", "gzip, deflate")
@@ -88,6 +104,12 @@ def add_header(request):
 
 
 def get_songs(movieid):
+    """
+    gets the songs for the given movie id
+    :param movieid: movie id
+    :return: list of songs
+    """
+
     request = urllib2.Request(EP_TUNEFIND_MOVIE_SONGS % movieid)
     add_header(request)
 
@@ -124,9 +146,6 @@ def load_from_web():
         # One request per second
         sleep(1.1)
 
-        if str(count) == LIMIT:
-            break
-
     common.write_json(JSON_OUT_FILE, movies)
 
 
@@ -147,12 +166,11 @@ def usage():
     print " -r \t Convert data to RDF"
     print " -u \t API Username"
     print " -p \t API Password"
-    print " -l \t Limit, 0: no limit"
 
 
 if __name__ == "__main__":
     try:
-        options = getopt.getopt(sys.argv[1:], "wru:p:l:", ["web", "rdf", "username=", "password=", "limit="])
+        options = getopt.getopt(sys.argv[1:], "wru:p:", ["web", "rdf", "username=", "password="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -162,8 +180,6 @@ if __name__ == "__main__":
             USERNAME = arg
         elif opt in ('-p', '--password'):
             PASSWORD = arg
-        elif opt in ('-l', '--limit'):
-            LIMIT = arg
         elif opt == "-w":
             LOAD_FROM_WEB = True
         elif opt == "-r":

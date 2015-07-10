@@ -1,3 +1,15 @@
+"""
+LoadFromWeb:
+    This skript gets the top [POSITION_LIMIT] chart entries from [STARTDATE] to [ENDDATE]
+    from the official german single charts https://www.offiziellecharts.de/
+    The data will be saved to ./data/[JSON_OUT_FILE]
+
+ConvertToRdf:
+    This skript converts the data read from ./data/[JSON_OUT_FILE] to triples.
+    [CONVERT_FROM_DATE] is used to reduce the triple count
+    The data will be saved to ./data/[RDF_OUT_FILE]
+"""
+
 from datetime import datetime, timedelta
 import getopt
 from multiprocessing import Pool
@@ -15,11 +27,14 @@ EP = "https://www.offiziellecharts.de/charts/single/for-date-%d"
 
 JSON_OUT_FILE = "charts_de.json"
 RDF_OUT_FILE = "charts_de.ttl"
+
 LOAD_FROM_WEB = False
 CONVERT_TO_RDF = False
+
 STARTDATE = "01.01.2000"
 ENDDATE = "31.05.2015"
 POSITION_LIMIT = 50
+CONVERT_FROM_DATE = "2005-01-01T00:00:00"
 
 BASE_URI = "http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#%s"
 NS_CHARTS = Namespace("http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#")
@@ -28,6 +43,10 @@ NS_DBPPROP = Namespace("http://dbpedia.org/property/")
 
 
 def convert_to_rdf():
+    """
+    Converts the read data to triples
+    """
+
     print ""
     print "Convert to RDF..."
 
@@ -39,7 +58,8 @@ def convert_to_rdf():
     g.bind("dbpprop", NS_DBPPROP)
 
     for c in charts:
-        if c["date"] < "2005-01-01T00:00:00":
+
+        if c["date"] < CONVERT_FROM_DATE:
             continue
 
         chart = URIRef(
@@ -53,7 +73,7 @@ def convert_to_rdf():
             g.add((artist, RDFS.label, Literal(t["artist"])))
             g.add((artist, NS_DBPPROP.name, Literal(t["artist"])))
 
-            song = URIRef(BASE_URI % common.encodeString(u"{0:s} - {1:s}".format(t['artist'],  t["title"])))
+            song = URIRef(BASE_URI % common.encodeString(u"{0:s} - {1:s}".format(t['artist'], t["title"])))
             g.add((song, RDF.type, NS_DBPEDIA_OWL.Song))
             g.add((song, RDFS.label, Literal(u"{0:s} - {1:s}".format(t['artist'], t["title"]))))
             g.add((song, NS_DBPPROP.title, Literal(t["title"])))
@@ -70,7 +90,12 @@ def convert_to_rdf():
     common.write_rdf(RDF_OUT_FILE, g)
 
 
-def process_date(current_date):
+def get_charts(current_date):
+    """
+    Grabs the charts entries for the given date
+    :return list of chart entries
+    """
+
     print u"{0:s}".format(current_date.strftime("%d.%m.%Y"))
 
     date_in_milliseconds = time.mktime(current_date.timetuple()) * 1000
@@ -102,7 +127,6 @@ def process_date(current_date):
     return chart
 
 
-# Main
 def load_from_web():
     print "Loading from Web..."
 
@@ -118,7 +142,7 @@ def load_from_web():
         current_date = current_date + date_delta
 
     pool = Pool(5)
-    results = [pool.apply_async(process_date, [d]) for d in days]
+    results = [pool.apply_async(get_charts, [d]) for d in days]
 
     charts = []
     for w in results:
@@ -146,7 +170,7 @@ def main():
     if CONVERT_TO_RDF:
         convert_to_rdf()
 
-# Main
+
 if __name__ == "__main__":
     try:
         options = getopt.getopt(sys.argv[1:], "wrs:e:", ["web", "rdf", "startdate=", "enddate="])

@@ -1,3 +1,15 @@
+"""
+LoadFromWeb:
+    This skript reads in the data from [JSON_IN_FILE] and uses the imdb id to get release and cast infos from
+    http://www.imdb.com/
+    The data will be saved to ./data/[JSON_OUT_FILE]
+
+ConvertToRdf:
+    This skript converts the data read from ./data/[JSON_OUT_FILE] to triples.
+    [CONVERT_FROM_DATE] is used to reduce the triple count
+    The data will be saved to ./data/[RDF_OUT_FILE]
+"""
+
 import getopt
 from multiprocessing.pool import Pool
 from datetime import datetime
@@ -17,6 +29,10 @@ RDF_OUT_FILE = "imdb.ttl"
 LOAD_FROM_WEB = False
 CONVERT_TO_RDF = False
 
+CONVERT_RELEASE_COUNTRY = ["USA", "Germany", "UK"]
+CONVERT_MAX_CAST = 10
+CONVERT_FROM_DATE = "2005-01-01T00:00:00"
+
 EP_IMDB_RELEASEINFO = "http://www.imdb.com/title/%s/releaseinfo"
 EP_IMDB_CAST = "http://www.imdb.com/title/%s/fullcredits"
 
@@ -25,7 +41,14 @@ NS_IMDB = Namespace("http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#")
 NS_DBPEDIA_OWL = Namespace("http://dbpedia.org/ontology/")
 NS_DBPPROP = Namespace("http://dbpedia.org/property/")
 
+
 def release_filter(movie):
+    """
+    Uses [CONVERT_FROM_DATE] to determine if the given movie will be converted to triples
+    :param movie: movie to check release date
+    :return: true or false
+    """
+
     def get_date(r):
         if "date" in r:
             return r["date"]
@@ -37,12 +60,17 @@ def release_filter(movie):
     for ri in sorted_release_info:
         if "date" not in ri:
             continue
-        if ri["date"] < "2005-01-01T00:00:00":
+        if ri["date"] < CONVERT_FROM_DATE:
             return False
         else:
             return True
 
+
 def convert_to_rdf():
+    """
+    Converts the read data to triples
+    """
+
     print ""
     print "Convert to RDF..."
 
@@ -72,7 +100,7 @@ def convert_to_rdf():
                 g.add((movie, NS_DBPEDIA_OWL.director, director))
 
         if "cast" in m:
-            for cast in m["cast"][:10]:
+            for cast in m["cast"][:CONVERT_MAX_CAST]:
                 if cast["screen_name"] == "":
                     continue
 
@@ -93,7 +121,7 @@ def convert_to_rdf():
                 if "date" not in info:
                     continue
 
-                if info["country"] != "UK" and info["country"] != "Germany" and info["country"] != "USA":
+                if info["country"] not in CONVERT_RELEASE_COUNTRY:
                     continue
 
                 release = BNode()
@@ -109,7 +137,12 @@ def convert_to_rdf():
     common.write_rdf(RDF_OUT_FILE, g)
 
 
-def fetch_release_info(m):
+def get_release_info(m):
+    """
+    gets the release info for the given movie
+    :param m: movie
+    """
+
     url = EP_IMDB_RELEASEINFO % m["imdbID"]
     html = common.request_url(url)
 
@@ -141,6 +174,12 @@ def fetch_release_info(m):
 
 
 def extract_directors(soup):
+    """
+    extracts the directors from the given page
+    :param soup: BeautifulSoup object of the page
+    :return: list of directors
+    """
+
     director_row = soup.find("h4", text=re.compile("Directed")).find_next_sibling("table").find("tr")
     directors = []
 
@@ -154,6 +193,12 @@ def extract_directors(soup):
 
 
 def extract_cast(soup):
+    """
+    extracts the cast from the given page
+    :param soup: BeautifulSoup object of the page
+    :return: list of the cast
+    """
+
     info_row = soup.find(class_="cast_list").find("tr").find_next_sibling("tr")
     cast = []
 
@@ -182,7 +227,12 @@ def extract_cast(soup):
     return cast
 
 
-def fetch_cast(m):
+def get_directors_and_cast(m):
+    """
+    gets the directors and castfor the given movie
+    :param m: movie
+    """
+
     url = EP_IMDB_CAST % m["imdbID"]
     html = common.request_url(url)
 
@@ -206,12 +256,12 @@ def process_movie(m):
 
     movie = {"title": m["title"], "imdbID": m["imdbID"]}
     try:
-        fetch_release_info(movie)
+        get_release_info(movie)
     except Exception, e:
         print u"{0:s} - {1:s}".format(m["title"], e.message)
 
     try:
-        fetch_cast(movie)
+        get_directors_and_cast(movie)
     except Exception, e:
         print u"{0:s} - {1:s}".format(m["title"], e.message)
 

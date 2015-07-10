@@ -1,3 +1,14 @@
+"""
+LoadFromWeb:
+    This skript reads in the data from [JSON_IN_FILE] and uses the movie title to get the imdb from
+    http://www.omdbapi.com/
+    The data will be saved to ./data/[JSON_OUT_FILE]
+
+ConvertToRdf:
+    This skript converts the data read from ./data/[JSON_OUT_FILE] to triples.
+    The data will be saved to ./data/[RDF_OUT_FILE]
+"""
+
 import getopt
 import json
 from multiprocessing.pool import Pool
@@ -26,6 +37,10 @@ NS_DBPPROP = Namespace("http://dbpedia.org/property/")
 
 
 def convert_to_rdf():
+    """
+    Converts the read data to triples
+    """
+
     print ""
     print "Convert to RDF..."
 
@@ -49,6 +64,12 @@ def convert_to_rdf():
 
 
 def process_movie(m):
+    """
+    gets the imdb id for the given movie
+    :param m: tunefind movie object
+    :return: omdb movie object with imdbid
+    """
+
     print m["title"]
 
     re_match = re.search("^(.*?)(\s\(\d{4}\))?$", m["title"])
