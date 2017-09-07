@@ -1,0 +1,40 @@
+SELECT ?movieName ?songName ?pos ?dayDiff ?chartDate
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/lastfm#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/references#>
+WHERE
+{   
+	?imdbMovie rdfs:label ?movieName;
+               imdb:releasedIn ?rc ;               
+               owl:sameAs ?tfMovie .
+  
+    ?rc rdfs:label "Germany";
+        dbpedia-owl:publicationDate ?rDate
+  
+    FILTER(STRSTARTS(STR(?imdbMovie), "http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#"))
+    
+    ?tfMovie tunefind:contains ?tfSong .
+  
+    ?tfSong owl:sameAs ?cSong .  
+    ?cSong rdfs:label ?songName .
+    
+    FILTER(STRSTARTS(STR(?cSong), "http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#"))  
+  
+    ?chart a charts_de:Chart;
+           dbpedia-owl:publicationDate ?chartDate ;
+           charts_de:rankedSong ?r .
+  
+    ?r charts_de:song ?cSong ;
+       charts_de:position ?pos.
+  
+  FILTER (STR(?chartDate) > STR(?rDate))
+  
+  bind(year(?chartDate) - year(?rDate) as ?yearDiff)
+  bind((month(?chartDate) - month(?rDate)) + 12 * ?yearDiff as ?monthDiff)
+  bind((day(?chartDate) - day(?rDate)) + 30 * ?monthDiff as ?dayDiff)
+
+  FILTER (?dayDiff<= 100)
+}
+ORDER BY ?movieName ?songName ?dayDiff

@@ -1,0 +1,34 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>
+PREFIX dbpprop: <http://dbpedia.org/property/>
+
+INSERT
+{
+    GRAPH <http://imn.htwk-leipzig.de/pbachman/ontologies/references#>
+    {
+        ?tunefindSong owl:sameAs ?lastfmSong .
+        ?lastfmSong owl:sameAs ?tunefindSong .
+    }
+}
+USING <http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#>
+USING <http://imn.htwk-leipzig.de/pbachman/ontologies/lastfm#>
+WHERE
+{
+    ?tunefindSong a dbpedia-owl:Song ;
+                  dbpedia-owl:artist ?tunefindArtist ;
+                  dbpprop:title ?tunefindSongTitle .
+
+    FILTER(STRSTARTS(STR(?tunefindSong), "http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#"))
+
+    ?lastfmSong a dbpedia-owl:Song ;
+                dbpedia-owl:artist ?lastfmArtist ;
+                dbpprop:title ?lastfmSongTitle .
+
+    FILTER(STRSTARTS(STR(?lastfmSong), "http://imn.htwk-leipzig.de/pbachman/ontologies/lastfm#"))
+
+
+    FILTER(lcase(STR(?tunefindSongTitle)) = lcase(STR(?lastfmSongTitle)))
+}

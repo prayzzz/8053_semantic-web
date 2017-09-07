@@ -1,0 +1,71 @@
+SELECT ?movieName ?songName ?chartPosition ?daysAfterMovieRelease ?chartDate
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/lastfm#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/references#>
+WHERE
+{ 
+    {
+        SELECT ?movieName ?songName ?chartPosition ?daysAfterMovieRelease ?chartDate ?movieReleaseDate ?chartSong
+        WHERE
+        {
+            ?imdbMovie rdfs:label ?movieName;
+                       imdb:releasedIn ?releaseCountry ;               
+                       owl:sameAs ?tfMovie .
+  
+            ?releaseCountry rdfs:label "Germany";
+                            dbpedia-owl:publicationDate ?movieReleaseDate
+          
+            FILTER(STRSTARTS(STR(?imdbMovie), "http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#"))
+            
+            ?tfMovie tunefind:contains ?tfSong .
+          
+            ?tfSong owl:sameAs ?chartSong .  
+            ?chartSong rdfs:label ?songName .
+            
+            FILTER(STRSTARTS(STR(?chartSong), "http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#"))  
+          
+            ?chart a charts_de:Chart;
+                   dbpedia-owl:publicationDate ?chartDate ;
+                   charts_de:rankedSong ?rankedSong .
+          
+            ?rankedSong charts_de:song ?chartSong ;
+                        charts_de:position ?chartPosition.
+          
+            FILTER (STR(?chartDate) > STR(?movieReleaseDate))
+
+            bind(year(?chartDate) - year(?movieReleaseDate) as ?yearDiff)
+            bind((month(?chartDate) - month(?movieReleaseDate)) + 12 * ?yearDiff as ?monthDiff)
+            bind((day(?chartDate) - day(?movieReleaseDate)) + 30 * ?monthDiff as ?daysAfterMovieRelease)
+
+            FILTER (?daysAfterMovieRelease <= 100)
+        }
+    }
+    
+    OPTIONAL 
+    {
+        SELECT (COUNT(?outerChart) as ?rankingsBeforeMovieRelease) ?chartSong ?movieName
+        WHERE
+        {           
+            ?imdbMovie rdfs:label ?movieName;
+                       imdb:releasedIn ?releaseCountry ;               
+                       owl:sameAs ?tfMovie .
+  
+            ?releaseCountry rdfs:label "Germany";
+                            dbpedia-owl:publicationDate ?movieReleaseDate .
+        
+            ?outerRankedSong charts_de:song ?chartSong .
+                  
+            ?outerChart charts_de:rankedSong ?outerRankedSong ;
+                        dbpedia-owl:publicationDate ?outerChartDate .   
+            
+                   
+            FILTER (STR(?outerChartDate) < STR(?movieReleaseDate))    
+        }
+        GROUP BY ?chartSong ?movieName
+    }
+    
+    FILTER (!BOUND(?rankingsBeforeMovieRelease))
+}
+ORDER BY ?movieName ?songName ?daysAfterMovieRelease

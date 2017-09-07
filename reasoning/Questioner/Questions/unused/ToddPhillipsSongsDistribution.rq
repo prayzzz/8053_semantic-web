@@ -1,0 +1,69 @@
+SELECT ?movie ?SongCount ?TaggedSongs (COALESCE(?rs, 0) as ?RockSongs) (COALESCE(?ras, 0) as ?RapHipHopSongs)
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/imdb#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/charts_de#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/lastfm#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/tunefind#>
+FROM <http://imn.htwk-leipzig.de/pbachman/ontologies/references#>
+WHERE
+{
+	?imdbmovie dbpedia-owl:director imdb:Todd_Phillips ;
+                  dbpprop:title ?movie ;
+		   owl:sameAs ?tunefindFilm.
+	
+	{
+		SELECT (COUNT(DISTINCT ?song) as ?SongCount) ?tunefindFilm
+		WHERE
+		{
+			?tunefindFilm tunefind:contains ?song .
+		}
+		GROUP BY ?tunefindFilm
+
+	}
+
+       OPTIONAL
+       {
+        	SELECT (COUNT(DISTINCT ?song) as ?rs) ?tunefindFilm
+        	WHERE
+        	{
+            	?tunefindFilm tunefind:contains ?song .
+            	?song rdfs:label ?s ;
+                     owl:sameAs ?lastFmSong .
+
+          	?lastFmSong lastfm:tagged ?tag .
+
+          	FILTER (CONTAINS(lcase(?tag), "rock"))
+       		}
+        	GROUP BY ?tunefindFilm
+   	 }
+
+       OPTIONAL
+       {
+        	SELECT (COUNT(DISTINCT ?song) as ?ras) ?tunefindFilm
+        	WHERE
+        	{
+            	?tunefindFilm tunefind:contains ?song .
+            	?song rdfs:label ?s ;
+                     owl:sameAs ?lastFmSong .
+
+          	?lastFmSong lastfm:tagged ?tag .
+
+          	FILTER (CONTAINS(lcase(?tag), "hip") || CONTAINS(lcase(?tag), "hop") || CONTAINS(lcase(?tag), "rap"))
+       		}
+        	GROUP BY ?tunefindFilm
+   	 }
+
+       OPTIONAL
+       {
+        	SELECT (COUNT(DISTINCT ?song) as ?TaggedSongs) ?tunefindFilm
+        	WHERE
+        	{
+            	?tunefindFilm tunefind:contains ?song .
+            	?song rdfs:label ?s ;
+                     owl:sameAs ?lastFmSong .
+
+          	?lastFmSong lastfm:tagged ?tag .
+
+       		}
+        	GROUP BY ?tunefindFilm
+   	 }
+}

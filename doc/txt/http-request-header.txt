@@ -1,0 +1,4 @@
+accept: "text/html, application/json"
+accept-encoding: "gzip, deflate"
+authorization: "Basic %login%"
+user-agent: "%appName%;%email%"
